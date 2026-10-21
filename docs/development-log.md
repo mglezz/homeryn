@@ -33,3 +33,23 @@ I also launched the compiled console executable separately and verified PING/PON
 I have not performed the interactive button check because I am adding that control separately in Visual Studio. I do not mark that manual step complete.
 
 I have not implemented household behavior, SQLite persistence, authentication, cross-device access, or CPU-bound parallel work. I will use the proposed domain model and use-case inventory to define the next increment.
+
+## 2026-10-21 — Documentation voice and code readability
+
+### Review
+
+I found that applying first-person language to every document made instructions repetitive and obscured the actors in use-case flows. The distinction should be between describing the system and recording my own work.
+
+After reviewing the TCP examples from class 7, the Windows Forms example from class 5, and the class and constructor examples in the [coursework repository](https://github.com/mglezz/SistemasDistribuidos-ProgramacionParalelo), I adopted a more explicit coding style.
+
+### Changes
+
+I rewrote technical descriptions, models, instructions, and project status in an impersonal style. Investigation, decisions, and problems remain in first-person singular. In the use cases, I replaced ambiguous personal actions with the responsible actor or component.
+
+To make the code easier to follow, I replaced positional records and the server's primary constructor with ordinary classes and constructors. I expanded nested conditional expressions and property patterns into explicit conditions, used explicit object creation, and replaced the concurrency test's LINQ expressions with loops and a named method.
+
+I retained asynchronous I/O, cancellation, payload limits, and complete-frame reads. These mechanisms are required by Homeryn's communication behavior even though the initial classroom socket example is synchronous.
+
+### Verification
+
+I built the updated solution in Release with warnings treated as errors and ran all 13 integration checks successfully. The checks still cover 32 concurrent active clients, malformed traffic, cancellation, timeout, and shutdown. I left the designer files and manual button wiring unchanged.

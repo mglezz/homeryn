@@ -1,16 +1,16 @@
 # Proposed domain model
 
-I use this model to describe the household problem independently of C#, TCP, forms, and database tables. I have not implemented these entities or confirmed every business rule.
+This conceptual model describes the household problem independently of C#, TCP, forms, and database tables. The entities are not implemented, and the business rules remain provisional.
 
 ## Client-language description
 
-> I want to keep the things my household needs to buy and the chores we share in one place. I want to see what still needs doing, who is taking care of it, and what is already finished.
+People sharing a home need one place to keep their shopping lists and chores. Everyone should be able to see what still needs doing, who is taking care of it, and what is already finished.
 
-I record this as my initial product statement, not as a quotation from an interviewed customer.
+This is an initial product statement, not a quotation from an interviewed customer.
 
 ## Concepts
 
-| Concept | Meaning I assign |
+| Concept | Meaning |
 | --- | --- |
 | Household | A shared home and the boundary for its shopping lists, chores, and memberships. |
 | Person | An individual who may participate in a household. |
@@ -19,7 +19,7 @@ I record this as my initial product statement, not as a quotation from an interv
 | Shopping item | An entry whose purchase state can be pending or purchased. |
 | Chore | A household responsibility whose completion state can be pending or completed. |
 
-I propose the following conceptual associations. I use names and multiplicities to express the domain; I do not prescribe persistence keys or C# properties here.
+The following associations describe domain concepts and multiplicities. They do not prescribe persistence keys or C# properties.
 
 ```mermaid
 classDiagram
@@ -33,16 +33,16 @@ classDiagram
 
 ## Proposed constraints
 
-I propose at least one member per household and at most one membership for the same person in the same household. I allow a chore to remain unassigned; if assigned, I require its assignee to belong to that chore's household.
+A household has at least one member. A person has at most one membership in the same household. A chore may remain unassigned; an assigned chore must belong to the same household as its assignee's membership.
 
-I treat purchase and completion as distinct concepts. I tentatively allow a purchased item to return to pending and a completed chore to be reopened, but I defer those transitions until I detail the corresponding use cases.
+Purchase and completion are distinct concepts. Returning a purchased item to pending and reopening a completed chore are proposed transitions, subject to the detailed use cases.
 
-## Questions I still need to resolve
+## Open questions
 
-- I need to decide whether a person can actively belong to several households in the first release.
-- I need to define who can invite or remove members and what happens when the final member leaves.
-- I need to define invitation, identity, and authentication behavior.
-- I need to decide whether the first release supports one or several shopping lists per household.
-- I need to define quantities, due dates, reassignment, deletion, and conflicting concurrent edits.
+- Can a person actively belong to several households in the first release?
+- Who can invite or remove members, and what happens when the final member leaves?
+- How should invitations, identity, and authentication work?
+- Does the first release support one or several shopping lists per household?
+- What rules apply to quantities, due dates, reassignment, deletion, and conflicting concurrent edits?
 
-I will refine the model as I answer these questions rather than infer business rules from the initial empty class names.
+The model will be refined as these questions are resolved.

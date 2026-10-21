@@ -1,17 +1,17 @@
 # Verification
 
-I run the integration checks from the repository root:
+Run the integration checks from the repository root:
 
 ```powershell
 dotnet build Homeryn.slnx --configuration Release --warnaserror
 dotnet run --project tests/Homeryn.IntegrationTests --configuration Release --no-build
 ```
 
-I use a standalone console runner without third-party test packages. I print one PASS line per completed check and return a nonzero exit code on failure. I do not use `dotnet test` for this runner.
+The standalone console runner requires no third-party test packages. It prints one PASS line per completed check and returns a nonzero exit code on failure. Use `dotnet run`, not `dotnet test`, to execute it.
 
-I start the actual server on an ephemeral loopback port, so I can run verification without claiming the application's normal port 5000. I reference the actual desktop connection service and independently construct raw frames for wire-level checks.
+The runner starts the actual server on an ephemeral loopback port, leaving the application's normal port 5000 available. It uses the actual desktop connection service and independently constructs frames for wire-level checks.
 
-I cover:
+Coverage includes:
 
 - Successful desktop PING/PONG.
 - A header and payload written one byte at a time.
@@ -25,6 +25,6 @@ I cover:
 - The desktop operation's five-second timeout.
 - Shutdown while clients are idle or partway through a frame, followed by port reuse.
 
-I bound the suite with a 30-second cancellation deadline and a separate shutdown timeout. I verify 96 successful exchanges in the concurrency scenario; I do not interpret that small local test as a throughput benchmark or a scalability guarantee.
+A 30-second cancellation deadline bounds the suite, with a separate shutdown timeout. The concurrency scenario verifies 96 successful exchanges; it is not a throughput benchmark or scalability guarantee.
 
-I do not automate Windows Forms interaction in this milestone. I document the remaining manual button check in the [development guide](../docs/development.md). I also do not test SQLite or business rules before they exist.
+Windows Forms interaction is not automated in this milestone. The remaining manual button check is described in the [development guide](../docs/development.md). SQLite and business-rule tests will be added alongside those implementations.
