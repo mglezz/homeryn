@@ -6,10 +6,10 @@ using System.Text.Json;
 using Homeryn.Desktop.Networking;
 using Homeryn.Server.Networking;
 
-using CancellationTokenSource deadline = new(TimeSpan.FromSeconds(30));
+using CancellationTokenSource deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 using CancellationTokenSource shutdown = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
 CancellationToken token = deadline.Token;
-TcpServer server = new(IPAddress.Loopback, 0);
+TcpServer server = new TcpServer(IPAddress.Loopback, 0);
 Task serverTask = server.RunAsync(shutdown.Token);
 int port = server.LocalEndpoint.Port;
 int passed = 0;
@@ -35,7 +35,10 @@ try
     {
         using TcpClient client = await ConnectAsync();
         byte[] frame = Frame("""{"command":"PING"}""");
-        await client.GetStream().WriteAsync(frame.Concat(frame).ToArray(), token);
+        byte[] combinedFrames = new byte[frame.Length * 2];
+        frame.CopyTo(combinedFrames, 0);
+        frame.CopyTo(combinedFrames, frame.Length);
+        await client.GetStream().WriteAsync(combinedFrames, token);
         await ExpectAsync(client, "PONG");
         await ExpectAsync(client, "PONG");
     });
@@ -83,31 +86,32 @@ try
     await CheckAsync("32 active clients progress while another client is idle", async () =>
     {
         using TcpClient idle = await ConnectAsync();
-        List<TcpClient> clients = [];
+        List<TcpClient> clients = new List<TcpClient>();
         try
         {
             for (int index = 0; index < 32; index++)
             {
                 clients.Add(await ConnectAsync());
             }
-            await Task.WhenAll(clients.Select(async client =>
+            List<Task> requests = new List<Task>();
+            foreach (TcpClient client in clients)
             {
-                for (int request = 0; request < 3; request++)
-                {
-                    await client.GetStream().WriteAsync(Frame("""{"command":"PING"}"""), token);
-                    await ExpectAsync(client, "PONG");
-                }
-            }));
+                requests.Add(SendThreePingsAsync(client));
+            }
+            await Task.WhenAll(requests);
         }
         finally
         {
-            clients.ForEach(client => client.Dispose());
+            foreach (TcpClient client in clients)
+            {
+                client.Dispose();
+            }
         }
     });
 
     await CheckAsync("Desktop client honors caller cancellation", async () =>
     {
-        using CancellationTokenSource cancelled = new();
+        using CancellationTokenSource cancelled = new CancellationTokenSource();
         cancelled.Cancel();
         await ExpectExceptionAsync<OperationCanceledException>(() =>
             new TcpClientService().PingAsync(port: port, cancellationToken: cancelled.Token));
@@ -115,7 +119,7 @@ try
 
     await CheckAsync("Desktop client reports a refused connection", async () =>
     {
-        using Socket reserved = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        using Socket reserved = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         reserved.Bind(new IPEndPoint(IPAddress.Loopback, 0));
         int unavailablePort = ((IPEndPoint)reserved.LocalEndPoint!).Port;
         await ExpectExceptionAsync<SocketException>(() =>
@@ -124,7 +128,7 @@ try
 
     await CheckAsync("Desktop client rejects an oversized response frame", async () =>
     {
-        using TcpListener fakeServer = new(IPAddress.Loopback, 0);
+        using TcpListener fakeServer = new TcpListener(IPAddress.Loopback, 0);
         fakeServer.Start();
         Task ping = new TcpClientService().PingAsync(
             port: ((IPEndPoint)fakeServer.LocalEndpoint).Port, cancellationToken: token);
@@ -138,7 +142,7 @@ try
 
     await CheckAsync("Desktop client rejects an invalid response", async () =>
     {
-        using TcpListener fakeServer = new(IPAddress.Loopback, 0);
+        using TcpListener fakeServer = new TcpListener(IPAddress.Loopback, 0);
         fakeServer.Start();
         Task ping = new TcpClientService().PingAsync(
             port: ((IPEndPoint)fakeServer.LocalEndpoint).Port, cancellationToken: token);
@@ -150,7 +154,7 @@ try
 
     await CheckAsync("Desktop client times out when a server does not respond", async () =>
     {
-        using TcpListener fakeServer = new(IPAddress.Loopback, 0);
+        using TcpListener fakeServer = new TcpListener(IPAddress.Loopback, 0);
         fakeServer.Start();
         Task ping = new TcpClientService().PingAsync(
             port: ((IPEndPoint)fakeServer.LocalEndpoint).Port, cancellationToken: token);
@@ -167,7 +171,7 @@ try
         await partial.GetStream().WriteAsync(new byte[] { 0, 0, 0, 10, 123 }, token);
         await shutdown.CancelAsync();
         await serverTask.WaitAsync(TimeSpan.FromSeconds(3));
-        using TcpListener replacement = new(IPAddress.Loopback, port);
+        using TcpListener replacement = new TcpListener(IPAddress.Loopback, port);
         replacement.Start();
     });
 
@@ -184,6 +188,15 @@ finally
     await serverTask.WaitAsync(TimeSpan.FromSeconds(3));
 }
 
+async Task SendThreePingsAsync(TcpClient client)
+{
+    for (int request = 0; request < 3; request++)
+    {
+        await client.GetStream().WriteAsync(Frame("""{"command":"PING"}"""), token);
+        await ExpectAsync(client, "PONG");
+    }
+}
+
 async Task CheckAsync(string name, Func<Task> check)
 {
     await check();
@@ -193,7 +206,7 @@ async Task CheckAsync(string name, Func<Task> check)
 
 async Task<TcpClient> ConnectAsync()
 {
-    TcpClient client = new();
+    TcpClient client = new TcpClient();
     try
     {
         await client.ConnectAsync(IPAddress.Loopback, port, token);
@@ -220,7 +233,7 @@ async Task<JsonDocument> ReadJsonAsync(TcpClient client)
     byte[] header = new byte[4];
     await client.GetStream().ReadExactlyAsync(header, token);
     int length = BinaryPrimitives.ReadInt32BigEndian(header);
-    if (length is <= 0 or > 4096)
+    if (length <= 0 || length > 4096)
     {
         throw new InvalidDataException($"Unexpected response length: {length}");
     }

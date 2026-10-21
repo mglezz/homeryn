@@ -2,59 +2,83 @@
 
 ## Prerequisites and build
 
-I use Windows, the .NET 10 SDK, and Visual Studio with .NET desktop development support. I target `net10.0` for Server and Shared, and `net10.0-windows` for Desktop and the integration runner.
+Development requires Windows, the .NET 10 SDK, and Visual Studio with .NET desktop development support. Server and Shared target `net10.0`; Desktop and the integration runner target `net10.0-windows`.
 
-I run these commands from the repository root:
+Run these commands from the repository root:
 
 ```powershell
 dotnet build Homeryn.slnx --configuration Release --warnaserror
 dotnet run --project tests/Homeryn.IntegrationTests --configuration Release --no-build
 ```
 
-I use a package-free executable integration runner at this stage. I run it with `dotnet run`; I do not use `dotnet test` as evidence that these checks executed. I reserve migration to a test framework for a later testing milestone.
+The integration runner is a console application without third-party test packages. Execute it with `dotnet run`; `dotnet test` does not execute these checks.
 
 ## Run locally
 
-I start the server in one terminal:
+Start the server in one terminal:
 
 ```powershell
 dotnet run --project src/Homeryn.Server
 ```
 
-I expect the startup message to identify `127.0.0.1:5000`. I stop the server with Ctrl+C. If another process owns that port, I inspect it before deciding which process to stop.
+The startup message should identify `127.0.0.1:5000`. Press Ctrl+C to stop the server. If another process owns that port, identify it before deciding whether to stop it.
 
-I start the desktop application in another terminal:
+Start the desktop application in another terminal:
 
 ```powershell
 dotnet run --project src/Homeryn.Desktop
 ```
 
-I can open the window now, but I must add the connection button before using the diagnostic through the interface.
+The window can open now, but the connection button must be added before the diagnostic can be used through the interface.
 
 ## Visual Studio integration
 
-I open `Homeryn.slnx` at the repository root. I no longer open the initial solution from `src/Homeryn/`; any remaining `.vs` folder there is an ignored local cache.
+Open `Homeryn.slnx` at the repository root. The original solution path under `src/Homeryn/` is no longer used; any remaining `.vs` folder there is an ignored local cache.
 
-I keep the interface layout under manual control in Visual Studio:
+The interface is edited manually in Visual Studio:
 
-1. I open `MainForm` in the Windows Forms Designer.
-2. I add a `Button`, set its `Name` to `connectButton`, and set its `Text` to `Check connection`.
-3. I select the button, open the Properties event list, and assign `ConnectButton_Click` to `Click`.
-4. I start the server, then the desktop project, and click the button.
-5. I expect a readable success message. I repeat with the server stopped to verify error feedback.
+1. Open `MainForm` in the Windows Forms Designer.
+2. Add a `Button`, set its `Name` to `connectButton`, and set its `Text` to `Check connection`.
+3. Select the button, open the Properties event list, and assign `ConnectButton_Click` to `Click`.
+4. Start the server, then the desktop project, and click the button.
+5. Check that a success message appears. Repeat with the server stopped to verify error feedback.
 
-I use the existing event handler rather than generate a second implementation. I do not edit the networking service through the designer. I can configure Server and Desktop as multiple startup projects, but I retry the check if the desktop starts before the server begins listening.
+Use the existing event handler. Keep networking code in `TcpClientService`. Server and Desktop can be configured as multiple startup projects; retry the check if the desktop starts before the server begins listening.
+
+## Coding conventions
+
+Use straightforward C# that can be followed one step at a time. The [coursework repository](https://github.com/mglezz/SistemasDistribuidos-ProgramacionParalelo) provides the reference style.
+
+- Use descriptive English names for classes, methods, variables, and comments.
+- Prefer ordinary classes, explicit constructors, and explicit object creation.
+- Use namespace blocks and conventional entry-point methods in application code.
+- Prefer `if/else` branches and loops when compact expressions obscure the steps.
+- Keep methods focused and avoid abstractions without a concrete purpose.
+- Explain non-obvious networking behavior with short comments.
+- Keep `async/await`, cancellation, resource disposal, and complete-frame reads where required for correctness.
+
+The shared framing methods use a type parameter, `T`, so the same read/write logic can handle both request and response classes. This avoids duplicating the protocol implementation.
+
+## Documentation conventions
+
+Use impersonal descriptions for architecture, protocols, domain models, use cases, and project status. Write instructions as direct actions, such as "Open the solution" or "Run the server."
+
+Use first-person singular for investigation, decisions, errors encountered, and lessons learned. Keep those accounts primarily in the development log. Avoid repeating "I" in technical explanations.
+
+Keep technical documentation in precise English. Use natural, accessible language in the README and release notes. Distinguish proposed functionality from implemented behavior.
 
 ## Git workflow
 
-I work on focused branches and keep commit messages, branch names, and pull-request descriptions in technical English.
+Use focused branches and technical English for branch names, commit messages, and pull-request descriptions.
 
-I use commit subjects such as `build: establish the .NET 10 solution and project references`, `feat: implement framed JSON ping over asynchronous TCP`, and `test: verify concurrent TCP clients and connection failures`.
+Examples of commit subjects:
 
-Before integration, I inspect the diff, build with warnings treated as errors, and execute the integration runner. I describe the resulting behavior, validation evidence, and incomplete work in the pull request. I merge a validated branch into `main` while preserving its focused commits.
+- `build: establish the .NET 10 solution and project references`
+- `feat: implement framed JSON ping over asynchronous TCP`
+- `test: verify concurrent TCP clients and connection failures`
 
-I keep README and release notes approachable and distinguish working capabilities from planned features. I write engineering explanations and development records in first-person singular.
+Before integration, inspect the diff, build with warnings treated as errors, and execute the integration runner. The pull request should describe the resulting behavior, validation evidence, and incomplete work. Merge validated changes into `main` while preserving focused commits.
 
 ## Next implementation boundary
 
-I will finish the manual button wiring before marking the desktop connectivity scenario complete. I will then define the first household operation, its contract, and its persistence behavior before adding SQLite or business-service classes.
+Complete the manual button wiring before marking the desktop connectivity scenario complete. Define the first household operation, its contract, and its persistence behavior before adding SQLite or business-service classes.

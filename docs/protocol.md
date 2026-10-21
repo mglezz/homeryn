@@ -1,53 +1,53 @@
 # Initial TCP protocol
 
-I define a request/response protocol over TCP for the local connectivity milestone. I keep wire identifiers in English and command values case-sensitive.
+The local connectivity milestone uses a request/response protocol over TCP. Wire identifiers are in English, and command values are case-sensitive.
 
 ## Framing
 
-I encode each frame as:
+Each frame has the following structure:
 
 | Field | Size | Encoding |
 | --- | --- | --- |
 | Payload length | 4 bytes | Signed 32-bit integer, big-endian |
 | Payload | 1–4,096 bytes | UTF-8 JSON, without a byte-order mark |
 
-I measure the length in bytes, excluding the header. I use `ReadExactlyAsync` after detecting the beginning of a frame so that fragmented headers and payloads are reconstructed before JSON parsing. I read only the declared payload, leaving any following frame for the next request.
+The length counts payload bytes only. After detecting the beginning of a frame, `ReadExactlyAsync` completes the header and payload before JSON parsing. Only the declared payload is read, leaving any following frame for the next request.
 
-I use `System.Text.Json` web defaults: I write camel-case property names and accept property names case-insensitively. I tolerate unrecognized properties in this initial protocol. I do not use line delimiters, pretty-printed message boundaries, or assumptions about TCP packet sizes.
+Serialization uses `System.Text.Json` web defaults: output property names use camel case, and input property names are case-insensitive. Unrecognized properties are tolerated. Message boundaries depend on the length prefix, not line delimiters or TCP packet sizes.
 
 ## Messages
 
-I send the following request payload:
+Request payload:
 
 ```json
 {"command":"PING"}
 ```
 
-I return the following success payload:
+Success payload:
 
 ```json
 {"status":"PONG","error":null}
 ```
 
-I return an error for a nonempty, unsupported command:
+A nonempty, unsupported command produces:
 
 ```json
 {"status":"ERROR","error":"UNKNOWN_COMMAND"}
 ```
 
-I return an error for malformed JSON, a null/non-object request, or a missing, blank, null, or incorrectly typed command:
+Malformed JSON, a null/non-object request, or a missing, blank, null, or incorrectly typed command produces:
 
 ```json
 {"status":"ERROR","error":"INVALID_REQUEST"}
 ```
 
-I consume the entire frame before parsing its JSON, so I can continue reading the same connection after a request error. I close the connection without a response when the declared length is invalid or the header/payload is truncated. I treat end-of-stream between frames as a normal disconnection. I isolate these failures to the affected client.
+The entire frame is consumed before JSON parsing, allowing another request on the same connection after a request error. An invalid length or truncated header/payload closes the affected connection without a response. End-of-stream between frames is a normal disconnection. Other clients remain unaffected.
 
 ## Ordering and lifetime
 
-I support multiple sequential requests on one connection and return one response per complete valid-length request frame. I preserve request order on that connection. I do not support concurrent writers on the same stream, request identifiers, unsolicited events, or retries.
+A connection supports multiple sequential requests, with one response per complete valid-length request frame. Responses preserve request order. Concurrent writers on the same stream, request identifiers, unsolicited events, and retries are not supported.
 
-I use only one exchange per desktop diagnostic call. I require a `PONG` response with a null or absent error value before reporting success. I close that connection after the result, a failure, cancellation, or timeout.
+Each desktop diagnostic performs one exchange. Success requires a `PONG` response with a null or absent error value. The connection closes after success, failure, cancellation, or timeout.
 
 ```mermaid
 sequenceDiagram
@@ -64,4 +64,4 @@ sequenceDiagram
     Form-->>Developer: Show connection result
 ```
 
-I treat this protocol as an initial internal contract, not a stable public API. I will define versioning and request correlation before introducing incompatible messages or server notifications.
+This is an initial internal contract. Versioning and request correlation must be defined before incompatible messages or server notifications are introduced.

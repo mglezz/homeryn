@@ -6,8 +6,8 @@ namespace Homeryn.Desktop
 {
     public partial class MainForm : Form
     {
-        private readonly TcpClientService client = new();
-        private readonly CancellationTokenSource lifetime = new();
+        private readonly TcpClientService client = new TcpClientService();
+        private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private bool isConnecting;
 
         public MainForm()
@@ -24,7 +24,7 @@ namespace Homeryn.Desktop
 
             isConnecting = true;
             Button? button = sender as Button;
-            if (button is not null)
+            if (button != null)
             {
                 button.Enabled = false;
             }
@@ -46,21 +46,38 @@ namespace Homeryn.Desktop
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
-            catch (Exception exception) when (exception is SocketException or IOException or JsonException or InvalidDataException)
+            catch (SocketException)
             {
-                if (!IsDisposed)
-                {
-                    MessageBox.Show(this, "I couldn't connect. Check that the server is running and try again.",
-                        "Homeryn", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                ShowConnectionError();
+            }
+            catch (IOException)
+            {
+                ShowConnectionError();
+            }
+            catch (JsonException)
+            {
+                ShowConnectionError();
+            }
+            catch (InvalidDataException)
+            {
+                ShowConnectionError();
             }
             finally
             {
                 isConnecting = false;
-                if (button is { IsDisposed: false })
+                if (button != null && !button.IsDisposed)
                 {
                     button.Enabled = true;
                 }
+            }
+        }
+
+        private void ShowConnectionError()
+        {
+            if (!IsDisposed)
+            {
+                MessageBox.Show(this, "Couldn't connect. Check that the server is running and try again.",
+                    "Homeryn", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
