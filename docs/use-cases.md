@@ -21,7 +21,7 @@ Household goals are distinct from the connectivity experiment. The TCP server an
 | UC-05 | Household member | Create and assign a chore. | Core | Proposed |
 | UC-06 | Household member | Record a completed chore. | Core | Proposed |
 | UC-07 | Household member | View current household information. | Core | Proposed |
-| TECH-01 | Developer | Verify local client/server connectivity. | Current milestone | Implemented below the UI; manual button wiring pending |
+| TECH-01 | Developer | Verify local client/server connectivity. | Current milestone | Implemented and checked through the desktop window |
 
 Detailed household flows, permission rules, and acceptance criteria depend on the open questions in the [domain model](domain-model.md).
 
@@ -48,4 +48,4 @@ Detailed household flows, permission rules, and acceptance criteria depend on th
 
 **Postcondition:** One exchange has been verified. No household member is authenticated, and no persistent session is established.
 
-**Acceptance evidence:** The integration runner exercises the actual desktop service against the server, including malformed traffic, client failures, concurrent clients, and shutdown. The manual button check remains pending until the control is created in Visual Studio.
+**Acceptance evidence:** The integration runner exercises the actual desktop service against the server, including malformed traffic, client failures, concurrent clients, and shutdown. The desktop window has also been checked with the server running and stopped: the button displays the appropriate result and becomes available for another check.

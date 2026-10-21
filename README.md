@@ -22,7 +22,7 @@ Homeryn is intended for families, couples, and roommates. These features are pla
 
 The desktop app's connection code can exchange a simple message with a local server, and several connections can work at the same time.
 
-The desktop interface is being built separately in Visual Studio. Its connection button still needs to be added before that check can be tried directly from the window.
+The desktop window now includes a **Check connection** button. It reports whether the local server responds and shows a clear message if the server is unavailable. The rest of the interface is still being built in Visual Studio.
 
 Shopping lists, chores, accounts, invitations, and saved household information are not available yet. For now, connection tests stay on one computer.
 
