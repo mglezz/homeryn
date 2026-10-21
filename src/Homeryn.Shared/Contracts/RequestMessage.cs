@@ -1,10 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Homeryn.Shared.Contracts;
 
-namespace Homeryn.Shared.Contracts
-{
-    internal class RequestMessage
-    {
-    }
-}
+public sealed record RequestMessage(string Command);

@@ -1,10 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Homeryn.Shared.Contracts;
 
-namespace Homeryn.Shared.Contracts
-{
-    internal class ResponseMessage
-    {
-    }
-}
+public sealed record ResponseMessage(string Status, string? Error = null);
