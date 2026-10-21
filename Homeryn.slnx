@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Homeryn.Server/Homeryn.Server.csproj" />
+    <Project Path="src/Homeryn.Desktop/Homeryn.Desktop.csproj" />
+    <Project Path="src/Homeryn.Shared/Homeryn.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Homeryn.IntegrationTests/Homeryn.IntegrationTests.csproj" />
+  </Folder>
+</Solution>
