@@ -55,7 +55,7 @@ sequenceDiagram
     participant Form as MainForm
     participant Client as TcpClientService
     participant Server as ClientHandler
-    Developer->>Form: Click connection button (manual UI wiring)
+    Developer->>Form: Click connection button
     Form->>Client: PingAsync(cancellationToken)
     Client->>Server: TCP connect + framed PING
     Server-->>Client: Framed PONG

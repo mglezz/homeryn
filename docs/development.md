@@ -29,17 +29,17 @@ Start the desktop application in another terminal:
 dotnet run --project src/Homeryn.Desktop
 ```
 
-The window can open now, but the connection button must be added before the diagnostic can be used through the interface.
+Click **Check connection** to run the diagnostic. A successful exchange displays "The connection is working." If the server is unavailable, the window displays a connection error.
 
 ## Visual Studio integration
 
 Open `Homeryn.slnx` at the repository root. The original solution path under `src/Homeryn/` is no longer used; any remaining `.vs` folder there is an ignored local cache.
 
-The interface is edited manually in Visual Studio:
+The connection button is already configured in the Windows Forms Designer. To inspect it and verify the behavior:
 
 1. Open `MainForm` in the Windows Forms Designer.
-2. Add a `Button`, set its `Name` to `connectButton`, and set its `Text` to `Check connection`.
-3. Select the button, open the Properties event list, and assign `ConnectButton_Click` to `Click`.
+2. Select the existing button. Its `Name` is `connectButton`, its `Text` is `Check connection`, its `Location` is `24, 24`, and its `Size` is `160, 36`.
+3. Open the Properties event list and verify that `Click` is assigned to `ConnectButton_Click`.
 4. Start the server, then the desktop project, and click the button.
 5. Check that a success message appears. Repeat with the server stopped to verify error feedback.
 
@@ -81,4 +81,4 @@ Before integration, inspect the diff, build with warnings treated as errors, and
 
 ## Next implementation boundary
 
-Complete the manual button wiring before marking the desktop connectivity scenario complete. Define the first household operation, its contract, and its persistence behavior before adding SQLite or business-service classes.
+The desktop connectivity scenario is implemented and has been checked with the server running and stopped. Define the first household operation, its contract, and its persistence behavior before adding SQLite or business-service classes.

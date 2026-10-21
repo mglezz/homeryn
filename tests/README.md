@@ -27,4 +27,4 @@ Coverage includes:
 
 A 30-second cancellation deadline bounds the suite, with a separate shutdown timeout. The concurrency scenario verifies 96 successful exchanges; it is not a throughput benchmark or scalability guarantee.
 
-Windows Forms interaction is not automated in this milestone. The remaining manual button check is described in the [development guide](../docs/development.md). SQLite and business-rule tests will be added alongside those implementations.
+The integration runner does not exercise Windows Forms interaction. The connection button has also been checked through the running desktop window with the server available and unavailable. The repeatable procedure is described in the [development guide](../docs/development.md). SQLite and business-rule tests will be added alongside those implementations.

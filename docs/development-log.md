@@ -53,3 +53,17 @@ I retained asynchronous I/O, cancellation, payload limits, and complete-frame re
 ### Verification
 
 I built the updated solution in Release with warnings treated as errors and ran all 13 integration checks successfully. The checks still cover 32 concurrent active clients, malformed traffic, cancellation, timeout, and shutdown. I left the designer files and manual button wiring unchanged.
+
+## 2026-10-21 — Desktop connection button
+
+### Implementation
+
+I added the connection button through the Windows Forms Designer in Visual Studio. I set its name to `connectButton`, its text to `Check connection`, its location to `24, 24`, and its size to `160, 36`. I assigned the existing `ConnectButton_Click` handler through the event properties.
+
+### Verification
+
+I built the solution in Release with warnings treated as errors, then launched the desktop application from Visual Studio. With the local server running, clicking the button displayed "The connection is working." After stopping the server, the same button displayed the connection-error message and became available again after dismissal.
+
+These checks complete the previously pending desktop interaction for TECH-01. I updated the setup instructions and project status to reflect the working button.
+
+I also reran all 13 integration checks successfully after adding the control.
