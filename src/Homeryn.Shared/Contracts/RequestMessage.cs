@@ -1,3 +1,12 @@
-namespace Homeryn.Shared.Contracts;
+namespace Homeryn.Shared.Contracts
+{
+    public class RequestMessage
+    {
+        public string Command { get; }
 
-public sealed record RequestMessage(string Command);
+        public RequestMessage(string command)
+        {
+            Command = command;
+        }
+    }
+}

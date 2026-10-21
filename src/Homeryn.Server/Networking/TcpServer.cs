@@ -1,38 +1,60 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace Homeryn.Server.Networking;
-
-public sealed class TcpServer(IPAddress address, int port)
+namespace Homeryn.Server.Networking
 {
-    private readonly TcpListener listener = new(address, port);
-
-    public IPEndPoint LocalEndpoint => (IPEndPoint)listener.LocalEndpoint;
-
-    public async Task RunAsync(CancellationToken cancellationToken)
+    public class TcpServer
     {
-        using CancellationTokenSource shutdown = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        HashSet<Task> clients = [];
-        listener.Start();
+        private readonly TcpListener listener;
 
-        try
+        public TcpServer(IPAddress address, int port)
         {
-            Console.WriteLine($"Homeryn server listening on {LocalEndpoint}. Press Ctrl+C to stop.");
-            while (!shutdown.IsCancellationRequested)
+            listener = new TcpListener(address, port);
+        }
+
+        public IPEndPoint LocalEndpoint
+        {
+            get
             {
-                TcpClient client = await listener.AcceptTcpClientAsync(shutdown.Token);
-                clients.RemoveWhere(task => task.IsCompletedSuccessfully);
-                clients.Add(ClientHandler.HandleAsync(client, shutdown.Token));
+                return (IPEndPoint)listener.LocalEndpoint;
             }
         }
-        catch (OperationCanceledException) when (shutdown.IsCancellationRequested)
+
+        public async Task RunAsync(CancellationToken cancellationToken)
         {
-        }
-        finally
-        {
-            listener.Stop();
-            await shutdown.CancelAsync();
-            await Task.WhenAll(clients);
+            using CancellationTokenSource shutdown = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            List<Task> clientTasks = new List<Task>();
+            listener.Start();
+
+            try
+            {
+                Console.WriteLine($"Homeryn server listening on {LocalEndpoint}. Press Ctrl+C to stop.");
+                while (!shutdown.IsCancellationRequested)
+                {
+                    TcpClient client = await listener.AcceptTcpClientAsync(shutdown.Token);
+                    // Remove finished handlers so the list does not keep growing.
+                    for (int index = clientTasks.Count - 1; index >= 0; index--)
+                    {
+                        if (clientTasks[index].IsCompletedSuccessfully)
+                        {
+                            clientTasks.RemoveAt(index);
+                        }
+                    }
+
+                    Task clientTask = ClientHandler.HandleAsync(client, shutdown.Token);
+                    clientTasks.Add(clientTask);
+                }
+            }
+            catch (OperationCanceledException) when (shutdown.IsCancellationRequested)
+            {
+                // Cancellation is the expected result when the server stops.
+            }
+            finally
+            {
+                listener.Stop();
+                await shutdown.CancelAsync();
+                await Task.WhenAll(clientTasks);
+            }
         }
     }
 }

@@ -3,27 +3,28 @@ using System.Text.Json;
 using Homeryn.Shared.Communication;
 using Homeryn.Shared.Contracts;
 
-namespace Homeryn.Desktop.Networking;
-
-public sealed class TcpClientService
+namespace Homeryn.Desktop.Networking
 {
-    public async Task PingAsync(
-        string host = "127.0.0.1",
-        int port = 5000,
-        CancellationToken cancellationToken = default)
+    public class TcpClientService
     {
-        using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(5));
-
-        using TcpClient client = new();
-        await client.ConnectAsync(host, port, timeout.Token);
-        NetworkStream stream = client.GetStream();
-
-        await JsonMessageStream.WriteAsync(stream, new RequestMessage("PING"), timeout.Token);
-        ResponseMessage? response = await JsonMessageStream.ReadAsync<ResponseMessage>(stream, timeout.Token);
-        if (response is not { Status: "PONG", Error: null })
+        public async Task PingAsync(
+            string host = "127.0.0.1",
+            int port = 5000,
+            CancellationToken cancellationToken = default)
         {
-            throw new JsonException("The server did not return a valid PONG response.");
+            using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(TimeSpan.FromSeconds(5));
+
+            using TcpClient client = new TcpClient();
+            await client.ConnectAsync(host, port, timeout.Token);
+            NetworkStream stream = client.GetStream();
+
+            await JsonMessageStream.WriteAsync(stream, new RequestMessage("PING"), timeout.Token);
+            ResponseMessage? response = await JsonMessageStream.ReadAsync<ResponseMessage>(stream, timeout.Token);
+            if (response == null || response.Status != "PONG" || response.Error != null)
+            {
+                throw new JsonException("The server did not return a valid PONG response.");
+            }
         }
     }
 }

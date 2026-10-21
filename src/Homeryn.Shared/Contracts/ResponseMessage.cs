@@ -1,3 +1,14 @@
-namespace Homeryn.Shared.Contracts;
+namespace Homeryn.Shared.Contracts
+{
+    public class ResponseMessage
+    {
+        public string Status { get; }
+        public string? Error { get; }
 
-public sealed record ResponseMessage(string Status, string? Error = null);
+        public ResponseMessage(string status, string? error = null)
+        {
+            Status = status;
+            Error = error;
+        }
+    }
+}
