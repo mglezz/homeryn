@@ -5,11 +5,18 @@ using System.Text;
 using System.Text.Json;
 using Homeryn.Desktop.Networking;
 using Homeryn.Server.Networking;
+using Homeryn.Server.Persistence;
+using Homeryn.Server.Shopping;
+using Homeryn.IntegrationTests;
 
-using CancellationTokenSource deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+using CancellationTokenSource deadline = new CancellationTokenSource(TimeSpan.FromSeconds(90));
 using CancellationTokenSource shutdown = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
 CancellationToken token = deadline.Token;
-TcpServer server = new TcpServer(IPAddress.Loopback, 0);
+string testDirectory = Path.Combine(Path.GetTempPath(), "Homeryn.Tests", Guid.NewGuid().ToString("N"));
+SqliteShoppingItemRepository repository = new SqliteShoppingItemRepository(Path.Combine(testDirectory, "protocol.db"));
+repository.Initialize();
+using RequestDispatcher dispatcher = new RequestDispatcher(new ShoppingListService(repository));
+TcpServer server = new TcpServer(IPAddress.Loopback, 0, dispatcher);
 Task serverTask = server.RunAsync(shutdown.Token);
 int port = server.LocalEndpoint.Port;
 int passed = 0;
@@ -175,6 +182,7 @@ try
         replacement.Start();
     });
 
+    passed += await ShoppingListTests.RunAsync(testDirectory, token);
     Console.WriteLine($"PASS: {passed} integration checks.");
 }
 catch (Exception exception)
@@ -186,6 +194,7 @@ finally
 {
     await shutdown.CancelAsync();
     await serverTask.WaitAsync(TimeSpan.FromSeconds(3));
+    Directory.Delete(testDirectory, recursive: true);
 }
 
 async Task SendThreePingsAsync(TcpClient client)

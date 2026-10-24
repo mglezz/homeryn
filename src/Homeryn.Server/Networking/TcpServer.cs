@@ -6,10 +6,12 @@ namespace Homeryn.Server.Networking
     public class TcpServer
     {
         private readonly TcpListener listener;
+        private readonly RequestDispatcher dispatcher;
 
-        public TcpServer(IPAddress address, int port)
+        public TcpServer(IPAddress address, int port, RequestDispatcher dispatcher)
         {
             listener = new TcpListener(address, port);
+            this.dispatcher = dispatcher;
         }
 
         public IPEndPoint LocalEndpoint
@@ -41,7 +43,7 @@ namespace Homeryn.Server.Networking
                         }
                     }
 
-                    Task clientTask = ClientHandler.HandleAsync(client, shutdown.Token);
+                    Task clientTask = ClientHandler.HandleAsync(client, dispatcher, shutdown.Token);
                     clientTasks.Add(clientTask);
                 }
             }
