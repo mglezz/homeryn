@@ -1,6 +1,6 @@
 # Proposed domain model
 
-This conceptual model describes the household problem independently of C#, TCP, forms, and database tables. The entities are not implemented, and the business rules remain provisional.
+This conceptual model describes the household problem independently of C#, TCP, forms, and database tables. Household entities and membership rules remain provisional. The current prototype implements a shopping-item subset without household identity; it does not yet implement the complete model.
 
 ## Client-language description
 
@@ -45,4 +45,4 @@ Purchase and completion are distinct concepts. Returning a purchased item to pen
 - Does the first release support one or several shopping lists per household?
 - What rules apply to quantities, due dates, reassignment, deletion, and conflicting concurrent edits?
 
-The model will be refined as these questions are resolved.
+For the local shopping subset, names contain 1–80 UTF-16 code units after trimming, quantities are integers from 1 to 999, and purchase state can change in either direction. Duplicate names are allowed as distinct entries. Deletion is permanent. Concurrent edits require the version read by the client; stale changes are rejected. These implementation decisions are detailed in [Shopping list increment](shopping-list.md). Household-level policy remains open.

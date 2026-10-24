@@ -7,7 +7,7 @@ namespace Homeryn.Server.Networking
 {
     internal static class ClientHandler
     {
-        public static async Task HandleAsync(TcpClient client, CancellationToken cancellationToken)
+        public static async Task HandleAsync(TcpClient client, RequestDispatcher dispatcher, CancellationToken cancellationToken)
         {
             using (client)
             {
@@ -33,19 +33,7 @@ namespace Homeryn.Server.Networking
                             return;
                         }
 
-                        ResponseMessage response;
-                        if (string.IsNullOrWhiteSpace(request.Command))
-                        {
-                            response = new ResponseMessage("ERROR", "INVALID_REQUEST");
-                        }
-                        else if (request.Command == "PING")
-                        {
-                            response = new ResponseMessage("PONG");
-                        }
-                        else
-                        {
-                            response = new ResponseMessage("ERROR", "UNKNOWN_COMMAND");
-                        }
+                        ResponseMessage response = await dispatcher.DispatchAsync(request, cancellationToken);
 
                         await JsonMessageStream.WriteAsync(stream, response, cancellationToken);
                     }

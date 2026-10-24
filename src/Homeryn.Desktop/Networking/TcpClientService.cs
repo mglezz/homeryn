@@ -12,6 +12,19 @@ namespace Homeryn.Desktop.Networking
             int port = 5000,
             CancellationToken cancellationToken = default)
         {
+            ResponseMessage response = await SendAsync(new RequestMessage("PING"), host, port, cancellationToken);
+            if (response.Status != "PONG" || response.Error != null)
+            {
+                throw new JsonException("The server did not return a valid PONG response.");
+            }
+        }
+
+        public async Task<ResponseMessage> SendAsync(
+            RequestMessage request,
+            string host = "127.0.0.1",
+            int port = 5000,
+            CancellationToken cancellationToken = default)
+        {
             using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(5));
 
@@ -19,12 +32,13 @@ namespace Homeryn.Desktop.Networking
             await client.ConnectAsync(host, port, timeout.Token);
             NetworkStream stream = client.GetStream();
 
-            await JsonMessageStream.WriteAsync(stream, new RequestMessage("PING"), timeout.Token);
+            await JsonMessageStream.WriteAsync(stream, request, timeout.Token);
             ResponseMessage? response = await JsonMessageStream.ReadAsync<ResponseMessage>(stream, timeout.Token);
-            if (response == null || response.Status != "PONG" || response.Error != null)
+            if (response == null)
             {
-                throw new JsonException("The server did not return a valid PONG response.");
+                throw new JsonException("The server closed the connection without a response.");
             }
+            return response;
         }
     }
 }

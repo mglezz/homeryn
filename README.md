@@ -14,17 +14,17 @@ From adding milk to the shopping list to checking whose turn it is to clean the 
 - Keep everyone in a household up to date.
 - Save household information for the next time the app is opened.
 
-Homeryn is intended for families, couples, and roommates. These features are planned; they are not available yet.
+Homeryn is intended for families, couples, and roommates. Shopping lists are taking shape; chores and household accounts are still planned.
 
 ## Project status
 
-**The first working foundation is in place. There is no release ready for everyday use yet.**
+**The first shared shopping list is working. Homeryn is still an early local prototype.**
 
-The desktop app's connection code can exchange a simple message with a local server, and several connections can work at the same time.
+The shopping window lets you add items, change quantities, mark purchases, and remove items. Your list stays saved when the app and server close. Several copies of the desktop app can use the same local server.
 
-The desktop window now includes a **Check connection** button. It reports whether the local server responds and shows a clear message if the server is unavailable. The rest of the interface is still being built in Visual Studio.
+Use **Start server**, then **Shopping list**. Enter an item and quantity and click **Add**. Select a row to change it and click **Save**, or use **Remove**. Click **Refresh** to see changes from another window. If someone has already changed the same item, the app asks you to refresh before trying again.
 
-Shopping lists, chores, accounts, invitations, and saved household information are not available yet. For now, connection tests stay on one computer.
+The solution must be built first; setup instructions are in the [development guide](docs/development.md). **Check connection** is still available to check the server. There is one list per server, all on one computer. Chores, accounts, invitations, separate households, and access from other devices are not available yet.
 
 ## Why Homeryn?
 

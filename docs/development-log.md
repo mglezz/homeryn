@@ -1,5 +1,33 @@
 # Development log
 
+## 2026-10-24 — Persistent shared shopping list
+
+### Scope and decisions
+
+I completed the first shopping-list increment on the existing feature branch. I kept one list per local server so I could verify a complete client/server/storage flow before introducing households, accounts, or permissions. I retained the main-window layout and navigation already added in Visual Studio, and completed the shopping controls in the designer.
+
+I separated frame handling, command dispatch, application validation, and SQLite persistence. I used a small repository interface to keep SQL out of the shopping service. The desktop uses a shopping client over the existing framed TCP transport; form events only coordinate controls and requests.
+
+I chose integer quantities from 1 to 999, trimmed names up to 80 UTF-16 code units, and reversible purchase state. I added a version to each item so a stale edit or delete cannot silently replace a newer change. I kept the 4 KiB frame limit and introduced five-item cursor pages with an initial maximum identifier.
+
+### Problems resolved
+
+I replaced the form's cached item-name field because clearing the textbox could leave an old name ready to submit. Inputs now come directly from the controls, and an empty name disables Add. During interactive verification, I also noticed that disabling the grid could trigger selection changes; I guarded selection handling while requests are pending to protect the editor.
+
+I replaced the machine-specific server executable path with repository-relative discovery for the current build configuration and a file-selection fallback. I renamed the action Start server and check readiness with PING. Starting a process does not authenticate a user. I kept the Chores entry but added an explicit unavailable message instead of opening an empty form.
+
+After checking Microsoft's provider documentation, I treated SQLite operations as synchronous. I offloaded one storage operation at a time behind an asynchronous semaphore, used a separate connection per operation, and bounded SQLite lock waits. The test with an external write lock confirms that PING still progresses and storage recovers after the lock is released.
+
+I made uncertain write results explicit: a response may be lost after commit, so the desktop requires Refresh before another mutation instead of automatically retrying. The current refresh is not a snapshot across pages, and there are no server-pushed updates.
+
+### Verification
+
+I built the solution in Release with warnings treated as errors and ran all 20 integration checks. The checks cover the original TCP scenarios, shopping CRUD and validation, concurrent updates and additions, stale deletion, pagination, lock failure and recovery, and persistence across restart.
+
+I used an isolated temporary database for the desktop checks. I verified adding Milk, selecting it, saving quantity 3 and purchased state, clearing the editor after success, and displaying a readable error with further mutations disabled when the server stopped. I closed the verification instance afterwards. The full two-window manual checklist remains documented separately; concurrent-write correctness and restart behavior have automated evidence.
+
+I rebuilt after adding the selection guard and checked the final diff for whitespace errors. Household identity, authorization, chores, remote access, and CPU-bound parallel work remain outside this increment.
+
 ## 2026-10-21 — Local TCP foundation
 
 ### Starting point

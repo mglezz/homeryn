@@ -25,6 +25,33 @@ Coverage includes:
 - The desktop operation's five-second timeout.
 - Shutdown while clients are idle or partway through a frame, followed by port reuse.
 
-A 30-second cancellation deadline bounds the suite, with a separate shutdown timeout. The concurrency scenario verifies 96 successful exchanges; it is not a throughput benchmark or scalability guarantee.
+A 90-second cancellation deadline bounds the suite, with separate shutdown timeouts. The concurrency scenario verifies 96 successful exchanges; it is not a throughput benchmark or scalability guarantee.
 
-The integration runner does not exercise Windows Forms interaction. The connection button has also been checked through the running desktop window with the server available and unavailable. The repeatable procedure is described in the [development guide](../docs/development.md). SQLite and business-rule tests will be added alongside those implementations.
+Seven additional checks use isolated SQLite files and the actual shopping client and server:
+
+- Add, read, update, and delete, including trimmed Unicode names and purchase state.
+- Invalid names, quantities, missing payloads, identifiers, versions, and cursors.
+- Concurrent updates of the same version, stale deletion, and missing items.
+- Twenty-four concurrent additions, unique identifiers, and multiple pages of maximum-length escaped Unicode names.
+- Pagination across deletion and a subsequent addition beyond the first page's upper bound.
+- Database lock timeout while PING remains responsive, followed by recovery.
+- Restart persistence for fields, versions, and deletions.
+
+The runner currently contains 20 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+
+## Interactive verification
+
+The integration runner does not automate Windows Forms. To check the interface with isolated data:
+
+1. Start the server with `--database` pointing to a temporary file, then launch Desktop.
+2. Open Shopping list. Verify that an empty or whitespace-only name disables Add.
+3. Add an item, select it, change its quantity and purchase state, and Save.
+4. Open a second desktop process and load the list. Edit the same version in both windows; save one, then verify that the second reports a conflict and requires Refresh.
+5. Confirm Remove deletes a selected item; cancelling confirmation leaves it unchanged.
+6. Restart the server with the same file and reload to verify persistence.
+7. Stop the server, attempt Refresh, and verify readable feedback and disabled mutations. Restart and Refresh to recover.
+8. Close the shopping window while a request is pending; the application should remain usable.
+
+The connection-button procedure remains in the [development guide](../docs/development.md). Record completed manual checks separately from this repeatable checklist.
+
+On 2026-10-24, interactive checks with an isolated database covered an empty list, disabled Add for an empty name, adding an item, selecting it, saving quantity 3 and purchased state, clearing the editor after success, and feedback with mutations disabled after the server stopped. Deletion, concurrent conflicts, and restart persistence were verified by the integration runner; the full two-window manual checklist has not been completed.

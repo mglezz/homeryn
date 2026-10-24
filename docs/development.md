@@ -35,10 +35,10 @@ Click **Check connection** to run the diagnostic. A successful exchange displays
 
 Open `Homeryn.slnx` at the repository root. The original solution path under `src/Homeryn/` is no longer used; any remaining `.vs` folder there is an ignored local cache.
 
-The connection button is already configured in the Windows Forms Designer. To inspect it and verify the behavior:
+The controls are configured in the Windows Forms Designer. To inspect the connection diagnostic:
 
 1. Open `MainForm` in the Windows Forms Designer.
-2. Select the existing button. Its `Name` is `connectButton`, its `Text` is `Check connection`, its `Location` is `24, 24`, and its `Size` is `160, 36`.
+2. Select `connectButton`, with the text `Check connection`. Preserve the current main-window layout when changing behavior.
 3. Open the Properties event list and verify that `Click` is assigned to `ConnectButton_Click`.
 4. Start the server, then the desktop project, and click the button.
 5. Check that a success message appears. Repeat with the server stopped to verify error feedback.
@@ -79,6 +79,22 @@ Examples of commit subjects:
 
 Before integration, inspect the diff, build with warnings treated as errors, and execute the integration runner. The pull request should describe the resulting behavior, validation evidence, and incomplete work. Merge validated changes into `main` while preserving focused commits.
 
+## Shopping list and local storage
+
+Build the whole solution before using **Start server**. The launcher finds `Homeryn.Server.exe` under the repository's matching build configuration. If it cannot find the executable, select the built server in the file dialog. It checks PING before starting another process and waits for a response before reporting readiness. This is process startup, not authentication. The server has its own console and continues running after the desktop closes; stop it with Ctrl+C.
+
+The default database is `%LOCALAPPDATA%\Homeryn\server\homeryn.db`. The startup log prints the resolved path. Changing the working directory does not select a different default database. To use isolated test data:
+
+```powershell
+dotnet run --project src/Homeryn.Server -- --database "$env:TEMP\homeryn-demo\shopping.db"
+```
+
+The server creates schema version 1 on a new database and rejects a newer schema version. There is no automatic migration or backup facility yet. Stop the server before copying the database together with any remaining `-wal` and `-shm` files. Do not commit personal shopping data; database files are ignored.
+
+Open **Shopping list** to load items. **Add** creates an item from the fields. Selecting a row fills the editor; **Save** updates the selected version, and **Remove** asks for confirmation. **Refresh** reloads the list and clears the editor. Other windows' changes appear on refresh, not automatically. After a conflict or an unconfirmed result, refresh is required before another change.
+
+`ShoppingListForm.Designer.cs` owns the controls and event subscriptions. The form configures the three data-bound columns in `ConfigureItemsGrid`; transport and storage remain outside the form. See [verification](../tests/README.md) for manual checks.
+
 ## Next implementation boundary
 
-The desktop connectivity scenario is implemented and has been checked with the server running and stopped. Define the first household operation, its contract, and its persistence behavior before adding SQLite or business-service classes.
+Define household identity, membership, and authorization before separating data by household or accepting remote clients. Chores and assignment rules remain the next business capability; they are not implemented by this shopping increment.

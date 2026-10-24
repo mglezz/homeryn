@@ -16,14 +16,33 @@ Household goals are distinct from the connectivity experiment. The TCP server an
 | --- | --- | --- | --- | --- |
 | UC-01 | Household organizer | Create a household. | Core | Proposed |
 | UC-02 | Household organizer | Invite a person to the household. | Core | Proposed |
-| UC-03 | Household member | Maintain a shared shopping list. | Core | Proposed |
-| UC-04 | Household member | Record a purchased item. | Core | Proposed |
+| UC-03 | Household member | Maintain a shared shopping list. | Core | Implemented locally without membership or permissions |
+| UC-04 | Household member | Record a purchased item. | Core | Implemented locally without membership or permissions |
 | UC-05 | Household member | Create and assign a chore. | Core | Proposed |
 | UC-06 | Household member | Record a completed chore. | Core | Proposed |
 | UC-07 | Household member | View current household information. | Core | Proposed |
 | TECH-01 | Developer | Verify local client/server connectivity. | Current milestone | Implemented and checked through the desktop window |
 
-Detailed household flows, permission rules, and acceptance criteria depend on the open questions in the [domain model](domain-model.md).
+Household identity and permission rules still depend on the open questions in the [domain model](domain-model.md). In the current prototype, any local client acts as a list user without authentication.
+
+## UC-03: Maintain the local shared shopping list
+
+**Preconditions:** The server is running and its database is available.
+
+1. The user opens the shopping window; the application loads the list.
+2. The user enters a name and quantity and clicks Add.
+3. The server validates the input, stores the item, and returns its identifier and version.
+4. The window displays the committed item and clears the editor.
+5. The user selects a row, changes its fields, and clicks Save, or clicks Remove and confirms deletion.
+6. The server checks the selected version and commits the change.
+
+**Alternatives:** Invalid input leaves storage unchanged. A stale edit or deleted item requires refresh. A timeout or communication failure leaves the result uncertain and requires refresh before another mutation. Refresh clears the editor and loads current records. Closing the window cancels pending client work.
+
+**Postcondition:** Successful changes are persisted in SQLite and can be loaded by other clients. Membership and authorization are outside this increment.
+
+## UC-04: Record or reverse a purchase
+
+Select an item, change Purchased, and click Save. The same validation, version check, persistence, and failure behavior as UC-03 apply. Other windows observe the result on Refresh.
 
 ## TECH-01: Verify local connectivity
 
