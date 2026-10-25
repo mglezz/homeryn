@@ -32,6 +32,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            titleLabel = new Label();
+            hintLabel = new Label();
             itemsGrid = new DataGridView();
             itemNameLabel = new Label();
             quantityLabel = new Label();
@@ -46,20 +48,35 @@
             ((System.ComponentModel.ISupportInitialize)itemsGrid).BeginInit();
             ((System.ComponentModel.ISupportInitialize)quantityInput).BeginInit();
             SuspendLayout();
+            // titleLabel
+            titleLabel.AutoSize = true;
+            titleLabel.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            titleLabel.Location = new Point(24, 18);
+            titleLabel.Name = "titleLabel";
+            titleLabel.Text = "Shopping list";
+            // hintLabel
+            hintLabel.AutoSize = true;
+            hintLabel.Location = new Point(25, 56);
+            hintLabel.Name = "hintLabel";
+            hintLabel.Text = "Add an item to the list. Select a row to edit its details or mark it as purchased.";
             //
             // itemsGrid
             //
+            itemsGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            itemsGrid.BackgroundColor = SystemColors.Window;
+            itemsGrid.AccessibleName = "Shopping list";
             itemsGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            itemsGrid.Location = new Point(17, 16);
+            itemsGrid.Location = new Point(24, 85);
             itemsGrid.Name = "itemsGrid";
-            itemsGrid.Size = new Size(544, 220);
+            itemsGrid.Size = new Size(752, 235);
             itemsGrid.TabIndex = 0;
             itemsGrid.SelectionChanged += ItemsGrid_SelectionChanged;
             //
             // itemNameLabel
             //
             itemNameLabel.AutoSize = true;
-            itemNameLabel.Location = new Point(18, 248);
+            itemNameLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            itemNameLabel.Location = new Point(24, 338);
             itemNameLabel.Name = "itemNameLabel";
             itemNameLabel.Size = new Size(64, 15);
             itemNameLabel.TabIndex = 1;
@@ -68,57 +85,64 @@
             // quantityLabel
             //
             quantityLabel.AutoSize = true;
-            quantityLabel.Location = new Point(312, 248);
+            quantityLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            quantityLabel.Location = new Point(24, 402);
             quantityLabel.Name = "quantityLabel";
             quantityLabel.Size = new Size(53, 15);
-            quantityLabel.TabIndex = 2;
+            quantityLabel.TabIndex = 3;
             quantityLabel.Text = "&Quantity";
             //
             // quantityInput
             //
-            quantityInput.Location = new Point(312, 273);
+            quantityInput.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            quantityInput.Location = new Point(24, 426);
             quantityInput.Maximum = new decimal(new int[] { 999, 0, 0, 0 });
             quantityInput.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            quantityInput.AccessibleName = "Quantity";
             quantityInput.Name = "quantityInput";
-            quantityInput.Size = new Size(120, 23);
-            quantityInput.TabIndex = 3;
+            quantityInput.Size = new Size(200, 23);
+            quantityInput.TabIndex = 4;
             quantityInput.Value = new decimal(new int[] { 1, 0, 0, 0 });
             //
             // purchasedCheckBox
             //
             purchasedCheckBox.AutoSize = true;
-            purchasedCheckBox.Location = new Point(451, 273);
+            purchasedCheckBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            purchasedCheckBox.Location = new Point(338, 428);
             purchasedCheckBox.Name = "purchasedCheckBox";
             purchasedCheckBox.Size = new Size(81, 19);
-            purchasedCheckBox.TabIndex = 4;
+            purchasedCheckBox.TabIndex = 5;
             purchasedCheckBox.Text = "&Purchased";
             purchasedCheckBox.UseVisualStyleBackColor = true;
             //
             // addButton
             //
-            addButton.Location = new Point(18, 315);
+            addButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            addButton.Location = new Point(24, 472);
             addButton.Name = "addButton";
-            addButton.Size = new Size(75, 23);
-            addButton.TabIndex = 5;
+            addButton.Size = new Size(90, 32);
+            addButton.TabIndex = 6;
             addButton.Text = "&Add";
             addButton.UseVisualStyleBackColor = true;
             addButton.Click += AddButton_Click;
             //
             // removeButton
             //
-            removeButton.Location = new Point(143, 315);
+            removeButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            removeButton.Location = new Point(224, 472);
             removeButton.Name = "removeButton";
-            removeButton.Size = new Size(75, 23);
-            removeButton.TabIndex = 6;
+            removeButton.Size = new Size(90, 32);
+            removeButton.TabIndex = 8;
             removeButton.Text = "&Remove";
             removeButton.UseVisualStyleBackColor = true;
             removeButton.Click += RemoveButton_Click;
             //
             // saveButton
             //
-            saveButton.Location = new Point(268, 315);
+            saveButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            saveButton.Location = new Point(124, 472);
             saveButton.Name = "saveButton";
-            saveButton.Size = new Size(75, 23);
+            saveButton.Size = new Size(90, 32);
             saveButton.TabIndex = 7;
             saveButton.Text = "&Save";
             saveButton.UseVisualStyleBackColor = true;
@@ -126,27 +150,31 @@
             //
             // refreshButton
             //
-            refreshButton.Location = new Point(451, 315);
+            refreshButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            refreshButton.Location = new Point(676, 472);
             refreshButton.Name = "refreshButton";
-            refreshButton.Size = new Size(75, 23);
-            refreshButton.TabIndex = 8;
+            refreshButton.Size = new Size(100, 32);
+            refreshButton.TabIndex = 9;
             refreshButton.Text = "Re&fresh";
             refreshButton.UseVisualStyleBackColor = true;
             refreshButton.Click += RefreshButton_Click;
             //
             // statusLabel
             //
-            statusLabel.Location = new Point(18, 361);
+            statusLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            statusLabel.Location = new Point(24, 521);
             statusLabel.Name = "statusLabel";
-            statusLabel.Size = new Size(544, 64);
-            statusLabel.TabIndex = 9;
+            statusLabel.Size = new Size(752, 55);
+            statusLabel.TabIndex = 10;
             statusLabel.Text = "Open the list to load saved items.";
             //
             // itemNameTextBox
             //
-            itemNameTextBox.Location = new Point(18, 273);
+            itemNameTextBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            itemNameTextBox.Location = new Point(24, 362);
+            itemNameTextBox.AccessibleName = "Item name";
             itemNameTextBox.Name = "itemNameTextBox";
-            itemNameTextBox.Size = new Size(269, 23);
+            itemNameTextBox.Size = new Size(752, 23);
             itemNameTextBox.TabIndex = 2;
             itemNameTextBox.TextChanged += ItemNameTextBox_TextChanged;
             //
@@ -154,7 +182,11 @@
             //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(800, 590);
+            MinimumSize = new Size(816, 570);
+            StartPosition = FormStartPosition.CenterParent;
+            Controls.Add(titleLabel);
+            Controls.Add(hintLabel);
             Controls.Add(itemNameTextBox);
             Controls.Add(statusLabel);
             Controls.Add(refreshButton);
@@ -176,6 +208,8 @@
 
         #endregion
 
+        private Label titleLabel;
+        private Label hintLabel;
         private DataGridView itemsGrid;
         private Label itemNameLabel;
         private Label quantityLabel;
