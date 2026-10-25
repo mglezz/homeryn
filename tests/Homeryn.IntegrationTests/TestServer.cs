@@ -1,3 +1,4 @@
+using Homeryn.Server.Chores;
 using System.Net;
 using Homeryn.Desktop.Networking;
 using Homeryn.Server.Networking;
@@ -17,8 +18,9 @@ namespace Homeryn.IntegrationTests
         public TestServer(string databasePath)
         {
             SqliteShoppingItemRepository repository = new SqliteShoppingItemRepository(databasePath);
-            repository.Initialize();
-            dispatcher = new RequestDispatcher(new ShoppingListService(repository));
+            new SqliteDatabase(databasePath).Initialize();
+            dispatcher = new RequestDispatcher(new ShoppingListService(repository),
+                new ChoresService(new SqliteChoreRepository(databasePath)));
             TcpServer server = new TcpServer(IPAddress.Loopback, 0, dispatcher);
             serverTask = server.RunAsync(shutdown.Token);
             Port = server.LocalEndpoint.Port;

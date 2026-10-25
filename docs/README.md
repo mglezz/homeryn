@@ -10,6 +10,7 @@ The root README and future release notes use clear, approachable language for pe
 | [Architecture](architecture.md) | Component responsibilities and dependency boundaries. |
 | [Wire protocol](protocol.md) | Framing, messages, errors, and connection lifetime. |
 | [Shopping list increment](shopping-list.md) | Scope, persistence model, concurrency rules, and acceptance criteria. |
+| [Chores increment](chores.md) | Chore fields, assignment, completion, schema migration, and concurrency. |
 | [Domain model](domain-model.md) | Proposed household concepts and relationships. |
 | [Actors and use cases](use-cases.md) | User goals and the current technical verification scenario. |
 | [Development log](development-log.md) | Investigation, problems, decisions, and verification evidence. |

@@ -99,8 +99,8 @@ namespace Homeryn.Desktop
 
         private void ChoresButton_Click(object? sender, EventArgs e)
         {
-            MessageBox.Show(this, "Chores are not available yet. The shopping list is ready to use.",
-                "Homeryn", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            using ChoresForm choresForm = new ChoresForm();
+            choresForm.ShowDialog(this);
         }
 
         private async void StartServerButton_Click(object? sender, EventArgs e)
@@ -133,7 +133,7 @@ namespace Homeryn.Desktop
                 }
                 if (!IsDisposed)
                 {
-                    MessageBox.Show(this, "The server is ready. You can open the shopping list.",
+                    MessageBox.Show(this, "The server is ready. You can open Shopping list or Chores.",
                         "Homeryn", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }

@@ -1,3 +1,4 @@
+using Homeryn.Server.Chores;
 using System.Net;
 using System.Net.Sockets;
 using Homeryn.Server.Networking;
@@ -23,10 +24,11 @@ namespace Homeryn.Server
             {
                 string databasePath = GetDatabasePath(args);
                 SqliteShoppingItemRepository repository = new SqliteShoppingItemRepository(databasePath);
-                repository.Initialize();
-                using RequestDispatcher dispatcher = new RequestDispatcher(new ShoppingListService(repository));
+                new SqliteDatabase(databasePath).Initialize();
+                using RequestDispatcher dispatcher = new RequestDispatcher(new ShoppingListService(repository),
+                new ChoresService(new SqliteChoreRepository(databasePath)));
                 TcpServer server = new TcpServer(IPAddress.Loopback, 5000, dispatcher);
-                Console.WriteLine($"Shopping database: {Path.GetFullPath(databasePath)}");
+                Console.WriteLine($"Homeryn database: {Path.GetFullPath(databasePath)}");
                 await server.RunAsync(shutdown.Token);
             }
             catch (SocketException exception)

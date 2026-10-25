@@ -18,8 +18,8 @@ Household goals are distinct from the connectivity experiment. The TCP server an
 | UC-02 | Household organizer | Invite a person to the household. | Core | Proposed |
 | UC-03 | Household member | Maintain a shared shopping list. | Core | Implemented locally without membership or permissions |
 | UC-04 | Household member | Record a purchased item. | Core | Implemented locally without membership or permissions |
-| UC-05 | Household member | Create and assign a chore. | Core | Proposed |
-| UC-06 | Household member | Record a completed chore. | Core | Proposed |
+| UC-05 | Household member | Create and assign a chore. | Core | Implemented locally with free-text assignment |
+| UC-06 | Household member | Record a completed chore. | Core | Implemented locally without membership or permissions |
 | UC-07 | Household member | View current household information. | Core | Proposed |
 | TECH-01 | Developer | Verify local client/server connectivity. | Current milestone | Implemented and checked through the desktop window |
 
@@ -43,6 +43,14 @@ Household identity and permission rules still depend on the open questions in th
 ## UC-04: Record or reverse a purchase
 
 Select an item, change Purchased, and click Save. The same validation, version check, persistence, and failure behavior as UC-03 apply. Other windows observe the result on Refresh.
+
+## UC-05: Maintain local chores
+
+With the server running, open Chores. Enter a chore name, optionally a responsible person and due date, and click Add. Select a row to edit its fields and Save, or Remove and confirm deletion. New clears the selection and editor; Refresh loads current records. Assignment is a free-text label, not an authenticated household member. Validation, version conflicts, uncertain outcomes, and cancellation follow UC-03.
+
+## UC-06: Complete or reopen a chore
+
+Select a chore, check Completed, and Save. Uncheck Completed and Save to reopen it. The server persists the new version. Other clients observe it on Refresh. Completed chores stay visible until explicitly removed.
 
 ## TECH-01: Verify local connectivity
 

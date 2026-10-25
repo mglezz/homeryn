@@ -1,3 +1,4 @@
+using Homeryn.Server.Chores;
 using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
@@ -14,8 +15,9 @@ using CancellationTokenSource shutdown = CancellationTokenSource.CreateLinkedTok
 CancellationToken token = deadline.Token;
 string testDirectory = Path.Combine(Path.GetTempPath(), "Homeryn.Tests", Guid.NewGuid().ToString("N"));
 SqliteShoppingItemRepository repository = new SqliteShoppingItemRepository(Path.Combine(testDirectory, "protocol.db"));
-repository.Initialize();
-using RequestDispatcher dispatcher = new RequestDispatcher(new ShoppingListService(repository));
+new SqliteDatabase(Path.Combine(testDirectory, "protocol.db")).Initialize();
+using RequestDispatcher dispatcher = new RequestDispatcher(new ShoppingListService(repository),
+    new ChoresService(new SqliteChoreRepository(Path.Combine(testDirectory, "protocol.db"))));
 TcpServer server = new TcpServer(IPAddress.Loopback, 0, dispatcher);
 Task serverTask = server.RunAsync(shutdown.Token);
 int port = server.LocalEndpoint.Port;
@@ -183,6 +185,8 @@ try
     });
 
     passed += await ShoppingListTests.RunAsync(testDirectory, token);
+    passed += await ChoresTests.RunAsync(testDirectory, token);
+    passed += await DatabaseMigrationTests.RunAsync(testDirectory, token);
     Console.WriteLine($"PASS: {passed} integration checks.");
 }
 catch (Exception exception)
