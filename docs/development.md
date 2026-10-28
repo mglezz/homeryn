@@ -103,6 +103,8 @@ Open **Shopping list** to load items. **Add** creates an item from the fields. S
 
 `ShoppingListForm.Designer.cs` owns the controls and event subscriptions. The form configures the three data-bound columns in `ConfigureItemsGrid`; transport and storage remain outside the form. See [verification](../tests/README.md) for manual checks.
 
+Both editors use **New** to clear the current selection and start an entry. Add is disabled while a stored row is selected, and Save is enabled only when its fields change. Unsaved drafts disable row changes; New, Refresh, and a normal idle-window close ask before discarding them, with No selected by default. Failed refreshes preserve the draft. Closing during a pending request still cancels client work; a mutation may already have committed, so reload before repeating it. Name inputs are limited to 80 characters and assignees to 60.
+
 ## Chores
 
 Open **Chores** from the main window. Enter a name, optionally enter a responsible person and check the date picker to set a due date, then click **Add**. Select a row to edit it and click **Save**. Check **Completed** to finish a chore or uncheck it to reopen it. **New** clears the selection and fields. **Remove** asks for confirmation, and **Refresh** loads other clients' changes and clears the editor.

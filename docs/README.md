@@ -15,6 +15,7 @@ The root README and future release notes use clear, approachable language for pe
 | [Actors and use cases](use-cases.md) | User goals and the current technical verification scenario. |
 | [Development log](development-log.md) | Investigation, problems, decisions, and verification evidence. |
 | [Verification](../tests/README.md) | Executable integration checks and their limits. |
+| [Local stabilization](stabilization.md) | Verified scope and remaining work before a local release. |
 
 ## Reference material
 
