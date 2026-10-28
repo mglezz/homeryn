@@ -1,5 +1,11 @@
 # Development log
 
+## 2026-10-25 — Consistent desktop forms
+
+I applied the Chores visual layout to ShoppingListForm and MainForm: headings, hints, margins, native colors, button height, and footer spacing. Shopping now uses the same list/editor layout and opens centered over its parent. The main window groups its navigation into two balanced panels. I preserved the existing handlers and business behavior and kept the controls editable in the Windows Forms Designer.
+
+I built Release with warnings treated as errors and ran all 29 integration checks successfully. I visually checked the main window at normal and maximized sizes, navigation into Shopping list, and the shopping layout with its connection-error message visible.
+
 ## 2026-10-25 — Persistent chores
 
 I replaced the placeholder with a resizable Chores form and connected it to the existing TCP server. I kept controls and event subscriptions in the Designer file and added a separate client, service, repository, and shared contracts following the shopping implementation.

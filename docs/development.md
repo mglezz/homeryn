@@ -45,6 +45,12 @@ The controls are configured in the Windows Forms Designer. To inspect the connec
 
 Use the existing event handler. Keep networking code in `TcpClientService`. Server and Desktop can be configured as multiple startup projects; retry the check if the desktop starts before the server begins listening.
 
+## Form layout
+
+MainForm, ShoppingListForm, and ChoresForm use the same visual conventions: a bold 16-point Segoe UI heading, a short hint below it, 24-pixel outer margins, native controls, 32-pixel-high action buttons, and feedback below the actions. The two list windows share the same initial size, white grid area, and editor placement. The main window groups navigation into two equal-width panels.
+
+Keep these settings and event subscriptions in each Designer file. Preserve anchors, minimum sizes, and keyboard tab order when moving controls. List windows open centered over the main window.
+
 ## Coding conventions
 
 Use straightforward C# that can be followed one step at a time. The [coursework repository](https://github.com/mglezz/SistemasDistribuidos-ProgramacionParalelo) provides the reference style.
