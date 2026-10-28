@@ -37,7 +37,11 @@ Seven additional checks use isolated SQLite files and the actual shopping client
 - Database lock timeout while PING remains responsive, followed by recovery.
 - Restart persistence for fields, versions, and deletions.
 
-The runner currently contains 29 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+The runner currently contains 37 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+
+Eight client-response checks use local fake servers to reject missing stored fields, incomplete pages, null records, control characters, invalid identifiers/cursors, and unexpected initial versions. Both list clients must cancel a slow multi-page read within the shared five-second deadline rather than restarting the timeout for every page.
+
+The GitHub Actions `Verify` workflow runs the Release build and this console runner on Windows for every pull request and push to `main`. It also supports manual runs. It does not run interactive Windows Forms checks.
 
 Seven chore checks also cover CRUD, trimmed Unicode names and assignees, due dates, completion and reopening, clearing optional fields, validation, stale edits/deletes, concurrent additions, bounded pagination, lock recovery, and restart persistence. Two migration checks verify version-1 shopping preservation, independent chore storage, repeated initialization, and rejection of a newer schema.
 

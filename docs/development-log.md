@@ -1,5 +1,11 @@
 # Development log
 
+## 2026-10-28 — Response validation and repeatable verification
+
+I reviewed and integrated the pending chores and layout branches after a clean Release build and 29 passing checks. I found that constructor-based JSON deserialization could silently supply false or null for omitted stored fields. I enabled required constructor fields while keeping optional request defaults, aligned shopping name validation with chores, and rejected impossible creation versions and continuation cursors.
+
+I added one deadline for each complete list load and eight fake-server checks covering incomplete responses and slow pagination. I also added Windows CI using the actual console runner and a stable .NET 10 SDK selection. This protects the existing local scope; it does not establish release readiness or add household identity.
+
 ## 2026-10-25 — Consistent desktop forms
 
 I applied the Chores visual layout to ShoppingListForm and MainForm: headings, hints, margins, native colors, button height, and footer spacing. Shopping now uses the same list/editor layout and opens centered over its parent. The main window groups its navigation into two balanced panels. I preserved the existing handlers and business behavior and kept the controls editable in the Windows Forms Designer.

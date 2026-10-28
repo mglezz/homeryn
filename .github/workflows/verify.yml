@@ -1,0 +1,32 @@
+name: Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Restore
+        run: dotnet restore Homeryn.slnx
+      - name: Build Release with warnings as errors
+        run: dotnet build Homeryn.slnx --configuration Release --no-restore --warnaserror
+      - name: Run integration checks
+        run: dotnet run --project tests/Homeryn.IntegrationTests --configuration Release --no-build
