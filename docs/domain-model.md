@@ -1,6 +1,6 @@
 # Proposed domain model
 
-This conceptual model describes the household problem independently of C#, TCP, forms, and database tables. Household entities and membership rules remain provisional. The current prototype implements a shopping-item subset without household identity; it does not yet implement the complete model.
+This conceptual model describes the household problem independently of C#, TCP, forms, and database tables. Household entities and membership rules remain provisional. The current prototype implements shopping-item and chore subsets without household identity; it does not yet implement the complete model.
 
 ## Client-language description
 
@@ -46,3 +46,5 @@ Purchase and completion are distinct concepts. Returning a purchased item to pen
 - What rules apply to quantities, due dates, reassignment, deletion, and conflicting concurrent edits?
 
 For the local shopping subset, names contain 1–80 UTF-16 code units after trimming, quantities are integers from 1 to 999, and purchase state can change in either direction. Duplicate names are allowed as distinct entries. Deletion is permanent. Concurrent edits require the version read by the client; stale changes are rejected. These implementation decisions are detailed in [Shopping list increment](shopping-list.md). Household-level policy remains open.
+
+For local chores, names contain 1–80 UTF-16 code units, assignees are optional free-text labels of up to 60 code units, and due dates are optional calendar dates. Tasks can be completed and reopened. This is not membership-based assignment. Versions protect updates and deletes as in shopping. See [Chores](chores.md).

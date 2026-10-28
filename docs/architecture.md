@@ -2,13 +2,13 @@
 
 ## Scope
 
-The current implementation provides one persistent shopping list per local server. Household identity and membership remain pending. The chore form is a placeholder; the main window reports that chores are not available yet.
+The current implementation provides one persistent shopping list and one chore list per local server. Chores support optional free-text assignment, optional due dates, and completion. Household identity and membership remain pending.
 
 | Project | Responsibility | Production dependencies |
 | --- | --- | --- |
-| Homeryn.Server | Accept requests, validate shopping operations, and persist items. | Homeryn.Shared, Microsoft.Data.Sqlite 10.0.13 |
+| Homeryn.Server | Accept requests, validate shopping and chore operations, and persist records. | Homeryn.Shared, Microsoft.Data.Sqlite 10.0.13 |
 | Homeryn.Desktop | Host forms, send requests, and display results and conflicts. | Homeryn.Shared |
-| Homeryn.Shared | Define transport contracts, shopping DTOs, and JSON framing. | .NET libraries |
+| Homeryn.Shared | Define transport contracts, shopping and chore DTOs, and JSON framing. | .NET libraries |
 
 A separate executable verification project under `tests/` references both applications to exercise the actual server and desktop connection service. This does not introduce a production dependency between Server and Desktop.
 
@@ -42,6 +42,8 @@ Homeryn/
 
 Server now also contains `Shopping/` for application rules and the repository interface, and `Persistence/` for SQLite. Shared contains `Shopping/` for DTOs and command identifiers. Desktop contains `Hosting/` for launching the separately built local server. No production project reference connects Server and Desktop.
 
+Server and Shared also contain `Chores/` for chore rules, repository contracts, and DTOs. `ChoresForm`, `ChoresClient`, `ChoresService`, and `SqliteChoreRepository` follow the same boundaries as shopping. `SqliteDatabase` initializes and migrates the shared schema; both features use the dispatcher's storage gate.
+
 ## Connection lifecycle
 
 The server binds to IPv4 loopback at `127.0.0.1:5000`. It accepts connections asynchronously and starts one asynchronous handler per connection. Requests are processed sequentially within a connection; different connections can progress independently.
@@ -58,4 +60,4 @@ The form manages selection, button state, cancellation, and feedback. `ShoppingL
 
 SQLite calls are synchronous: Microsoft.Data.Sqlite does not implement asynchronous file I/O. The dispatcher waits asynchronously on a semaphore before offloading one storage operation to `Task.Run`. This bounds active storage work to one operation per server and keeps the accept loop and PING responsive. Each operation owns its connection; SQLite lock retries use a two-second timeout. Updates and deletes also use transactional version checks, so correctness does not depend only on the in-process semaphore. See [Microsoft's SQLite guidance](https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/async).
 
-Authentication, authorization, push events, connection quotas, idle deadlines, encryption, and a web endpoint remain outside this local prototype. The waiting request queue is not bounded. Payloads are limited to 4,096 bytes; lists use pages of five items. A browser client will need an HTTP/WebSocket adapter. See the [shopping increment](shopping-list.md) for persistence, concurrency, and failure semantics.
+Authentication, authorization, push events, connection quotas, idle deadlines, encryption, and a web endpoint remain outside this local prototype. The waiting request queue is not bounded. Payloads are limited to 4,096 bytes; shopping uses pages of five items and chores use pages of three. A browser client will need an HTTP/WebSocket adapter. See the [shopping increment](shopping-list.md) for persistence, concurrency, and failure semantics.

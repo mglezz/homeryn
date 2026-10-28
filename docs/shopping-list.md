@@ -20,7 +20,7 @@ The server is authoritative. Desktop controls improve feedback, but direct TCP r
 
 ## Storage model
 
-SQLite schema version 1 uses one `ShoppingItems` table:
+The shopping table was introduced in schema version 1 and remains unchanged in version 2. It uses one `ShoppingItems` table:
 
 | Column | Storage | Constraint |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ SQLite schema version 1 uses one `ShoppingItems` table:
 
 All user values use SQL parameters. Each operation opens and disposes its own connection. WAL mode is enabled at initialization. Pooling is disabled for this small local workload so connection lifetimes and test-file cleanup remain explicit.
 
-The default file is `%LOCALAPPDATA%\Homeryn\server\homeryn.db`; `--database <path>` overrides it. Schema creation and the version marker are committed together. Existing version-1 databases are reused, and newer versions are rejected. Future schema changes require an explicit migration plan.
+The default file is `%LOCALAPPDATA%\Homeryn\server\homeryn.db`; `--database <path>` overrides it. Schema creation and the version marker are committed together. Version-1 databases now migrate to version 2 by adding the Chores table; existing shopping data is preserved. Versions newer than 2 are rejected. See [Chores](chores.md).
 
 ## Concurrent writes
 

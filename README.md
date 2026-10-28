@@ -14,17 +14,19 @@ From adding milk to the shopping list to checking whose turn it is to clean the 
 - Keep everyone in a household up to date.
 - Save household information for the next time the app is opened.
 
-Homeryn is intended for families, couples, and roommates. Shopping lists are taking shape; chores and household accounts are still planned.
+Homeryn is intended for families, couples, and roommates. Shopping lists and chores are working locally; household accounts are still planned.
 
 ## Project status
 
-**The first shared shopping list is working. Homeryn is still an early local prototype.**
+**Shared shopping lists and chores are working. Homeryn is still an early local prototype.**
 
 The shopping window lets you add items, change quantities, mark purchases, and remove items. Your list stays saved when the app and server close. Several copies of the desktop app can use the same local server.
 
 Use **Start server**, then **Shopping list**. Enter an item and quantity and click **Add**. Select a row to change it and click **Save**, or use **Remove**. Click **Refresh** to see changes from another window. If someone has already changed the same item, the app asks you to refresh before trying again.
 
-The solution must be built first; setup instructions are in the [development guide](docs/development.md). **Check connection** is still available to check the server. There is one list per server, all on one computer. Chores, accounts, invitations, separate households, and access from other devices are not available yet.
+Open **Chores** to add a task with an optional responsible person and due date. Select a row, edit its details or check **Completed**, then click **Save**. Uncheck Completed to reopen it. **New** clears the editor; **Remove** asks for confirmation. Responsible people are free-text names until household accounts exist. Tasks stay saved after a restart.
+
+The solution must be built first; setup instructions are in the [development guide](docs/development.md). **Check connection** is still available to check the server. There is one shopping list and one chore list per server, all on one computer. Accounts, invitations, separate households, and access from other devices are not available yet.
 
 ## Why Homeryn?
 

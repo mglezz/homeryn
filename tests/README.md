@@ -37,7 +37,9 @@ Seven additional checks use isolated SQLite files and the actual shopping client
 - Database lock timeout while PING remains responsive, followed by recovery.
 - Restart persistence for fields, versions, and deletions.
 
-The runner currently contains 20 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+The runner currently contains 29 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+
+Seven chore checks also cover CRUD, trimmed Unicode names and assignees, due dates, completion and reopening, clearing optional fields, validation, stale edits/deletes, concurrent additions, bounded pagination, lock recovery, and restart persistence. Two migration checks verify version-1 shopping preservation, independent chore storage, repeated initialization, and rejection of a newer schema.
 
 ## Interactive verification
 
@@ -55,3 +57,17 @@ The integration runner does not automate Windows Forms. To check the interface w
 The connection-button procedure remains in the [development guide](../docs/development.md). Record completed manual checks separately from this repeatable checklist.
 
 On 2026-10-24, interactive checks with an isolated database covered an empty list, disabled Add for an empty name, adding an item, selecting it, saving quantity 3 and purchased state, clearing the editor after success, and feedback with mutations disabled after the server stopped. Deletion, concurrent conflicts, and restart persistence were verified by the integration runner; the full two-window manual checklist has not been completed.
+
+## Chores interface checks
+
+1. Open Chores with an isolated server database. Verify Add and Save are disabled for a blank name.
+2. Add a chore with a responsible person and no date. Select it and verify the editor fields.
+3. Check the due date and Completed, then Save. Verify the row, counts, and cleared editor.
+4. Select the row, uncheck Completed and the due date, clear the responsible person, and Save.
+5. Select a row and click New; verify the fields and selection clear without modifying storage.
+6. Load the same version in two desktop windows, save in one, then save in the other. Verify a conflict requires Refresh.
+7. Cancel a removal, then confirm removal and verify the resulting list.
+8. Stop the server and Refresh. Verify readable feedback and disabled mutations. Restart with the same database and Refresh to recover.
+9. Resize the form and open its Designer in Visual Studio to inspect the layout.
+
+On 2026-10-25, interactive checks with an isolated database covered the empty list, disabled Add/Save, adding a named and assigned chore without a date, selecting it, saving a due date and completed state, pending/completed counts, editor reset, server-unavailable feedback, and successful Refresh after restart with saved fields preserved. The Chores form also opened successfully in the Visual Studio Designer. Concurrent conflicts, deletion, reopening, and clearing optional fields were covered by the integration runner.

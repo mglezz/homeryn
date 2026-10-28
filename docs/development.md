@@ -89,12 +89,20 @@ The default database is `%LOCALAPPDATA%\Homeryn\server\homeryn.db`. The startup 
 dotnet run --project src/Homeryn.Server -- --database "$env:TEMP\homeryn-demo\shopping.db"
 ```
 
-The server creates schema version 1 on a new database and rejects a newer schema version. There is no automatic migration or backup facility yet. Stop the server before copying the database together with any remaining `-wal` and `-shm` files. Do not commit personal shopping data; database files are ignored.
+The server creates schema version 2 on a new database. Existing version-1 databases are migrated transactionally by adding Chores; shopping data is preserved. Schemas newer than version 2 are rejected. There is no automatic backup facility. Stop the server before copying the database together with any remaining `-wal` and `-shm` files. Do not commit personal shopping data; database files are ignored.
 
 Open **Shopping list** to load items. **Add** creates an item from the fields. Selecting a row fills the editor; **Save** updates the selected version, and **Remove** asks for confirmation. **Refresh** reloads the list and clears the editor. Other windows' changes appear on refresh, not automatically. After a conflict or an unconfirmed result, refresh is required before another change.
 
 `ShoppingListForm.Designer.cs` owns the controls and event subscriptions. The form configures the three data-bound columns in `ConfigureItemsGrid`; transport and storage remain outside the form. See [verification](../tests/README.md) for manual checks.
 
+## Chores
+
+Open **Chores** from the main window. Enter a name, optionally enter a responsible person and check the date picker to set a due date, then click **Add**. Select a row to edit it and click **Save**. Check **Completed** to finish a chore or uncheck it to reopen it. **New** clears the selection and fields. **Remove** asks for confirmation, and **Refresh** loads other clients' changes and clears the editor.
+
+The controls and event subscriptions belong to `ChoresForm.Designer.cs`; its four data-bound columns are configured in `ConfigureItemsGrid`. The resizable layout remains editable in the Windows Forms Designer. Networking belongs to `ChoresClient` and `TcpClientService`; server validation and SQLite access remain outside the form.
+
+Restart a previously running server after rebuilding so the new chore commands are available. Use an isolated database for manual testing as described above. See [Chores](chores.md) for data rules and [verification](../tests/README.md) for checks.
+
 ## Next implementation boundary
 
-Define household identity, membership, and authorization before separating data by household or accepting remote clients. Chores and assignment rules remain the next business capability; they are not implemented by this shopping increment.
+Define household identity, membership, and authorization before separating data by household or accepting remote clients. Chores currently use optional free-text assignees. Membership-based assignment, recurring chores, and reminders remain future work.

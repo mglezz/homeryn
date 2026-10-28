@@ -1,5 +1,15 @@
 # Development log
 
+## 2026-10-25 — Persistent chores
+
+I replaced the placeholder with a resizable Chores form and connected it to the existing TCP server. I kept controls and event subscriptions in the Designer file and added a separate client, service, repository, and shared contracts following the shopping implementation.
+
+I chose optional free-text assignment because household identity does not exist yet. Due dates are optional calendar dates, and completion can be reversed. I retained version checks and refresh-after-conflict behavior. Three chores per page keep maximum-length escaped names and assignees within the existing frame limit.
+
+I moved schema initialization into SqliteDatabase and added a transactional version-1-to-2 migration that preserves shopping data. I verified both features through the actual clients and TCP server with isolated databases, including concurrent changes, lock errors, paging, restart persistence, and migration. The Release build passed with warnings treated as errors, and all 29 integration checks passed.
+
+I also checked the running interface with an isolated database: creating and assigning a chore, selecting it, setting a due date, marking it completed, saving, and recovering after the server stopped and restarted. Deletion and concurrent conflicts were verified by integration checks rather than the two-window manual workflow. Household accounts, member-based assignment, recurrence, and reminders remain future work.
+
 ## 2026-10-24 — Persistent shared shopping list
 
 ### Scope and decisions

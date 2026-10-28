@@ -19,39 +19,6 @@ namespace Homeryn.Server.Persistence
             connectionString = settings.ToString();
         }
 
-        public void Initialize()
-        {
-            using SqliteConnection connection = OpenConnection();
-            using SqliteCommand journal = connection.CreateCommand();
-            journal.CommandText = "PRAGMA journal_mode = WAL;";
-            journal.ExecuteNonQuery();
-
-            using SqliteTransaction transaction = connection.BeginTransaction();
-            using SqliteCommand command = connection.CreateCommand();
-            command.Transaction = transaction;
-            command.CommandText = "PRAGMA user_version;";
-            long version = (long)command.ExecuteScalar()!;
-            if (version > 1)
-            {
-                throw new InvalidDataException("This database requires a newer server version.");
-            }
-            if (version == 0)
-            {
-                command.CommandText = """
-                    CREATE TABLE ShoppingItems (
-                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        Name TEXT NOT NULL CHECK (length(Name) BETWEEN 1 AND 80),
-                        Quantity INTEGER NOT NULL CHECK (Quantity BETWEEN 1 AND 999),
-                        IsPurchased INTEGER NOT NULL CHECK (IsPurchased IN (0, 1)),
-                        Version INTEGER NOT NULL CHECK (Version > 0)
-                    );
-                    PRAGMA user_version = 1;
-                    """;
-                command.ExecuteNonQuery();
-            }
-            transaction.Commit();
-        }
-
         public ShoppingPage ReadPage(long afterItemId, long? upperBoundId)
         {
             using SqliteConnection connection = OpenConnection();

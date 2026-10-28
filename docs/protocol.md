@@ -1,6 +1,6 @@
 # Initial TCP protocol
 
-The local prototype uses a request/response protocol over TCP for diagnostics and shopping operations. Wire identifiers are in English, and command values are case-sensitive.
+The local prototype uses a request/response protocol over TCP for diagnostics, shopping, and chores. Wire identifiers are in English, and command values are case-sensitive.
 
 ## Framing
 
@@ -90,6 +90,27 @@ Continue with `afterItemId` equal to `nextAfterId` and the returned `upperBoundI
 | STORAGE_UNAVAILABLE | SQLite could not complete the operation, including a lock timeout. |
 
 These errors use the same `ERROR` envelope as protocol errors. Incorrect JSON value types produce `INVALID_REQUEST`. Unknown properties are ignored. No household identity or authorization field exists in this local contract.
+
+## Chore messages
+
+Chore successes use the same `OK` envelope. Shopping fields and chore fields are independent; unused fields may be null or default.
+
+| Command | Request fields | Success data |
+| --- | --- | --- |
+| LIST_CHORES | `afterChoreId` (default 0), `upperBoundId` (initially null) | `chorePage` |
+| ADD_CHORE | `chore`: name, assignee, dueDate, isCompleted | Stored `chore` |
+| UPDATE_CHORE | `choreId`, `expectedVersion`, complete `chore` | Updated `chore` |
+| DELETE_CHORE | `choreId`, `expectedVersion` | No chore or page |
+
+```json
+{"command":"ADD_CHORE","chore":{"name":"Clean kitchen","assignee":"Alex","dueDate":"2026-10-31","isCompleted":false}}
+```
+
+`assignee` and `dueDate` are nullable; dates use `yyyy-MM-dd`. An omitted completion flag defaults to false. Updates replace all editable fields, so omitted optional values clear them. A returned chore includes `id` and `version` in addition to the editable fields.
+
+`chorePage` contains `items`, `upperBoundId`, and `nextAfterId`, with at most three records. Continue using `afterChoreId` equal to `nextAfterId` and the same upper bound. The desktop validates ordering, boundaries, record fields, and cursor advancement.
+
+Chore errors are `INVALID_CHORE` for a missing payload, `INVALID_NAME`, `INVALID_ASSIGNEE`, `INVALID_DUE_DATE`, `INVALID_CHORE_VERSION`, `INVALID_PAGE`, `CHORE_NOT_FOUND`, `CHORE_CONFLICT`, and `STORAGE_UNAVAILABLE`. Invalid JSON types and malformed dates produce `INVALID_REQUEST`. See [chore rules](chores.md) for valid field values.
 
 ## Ordering and lifetime
 
