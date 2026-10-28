@@ -1,4 +1,4 @@
-﻿namespace Homeryn.Desktop.Forms
+namespace Homeryn.Desktop.Forms
 {
     partial class ShoppingListForm
     {
@@ -39,6 +39,7 @@
             quantityLabel = new Label();
             quantityInput = new NumericUpDown();
             purchasedCheckBox = new CheckBox();
+            newButton = new Button();
             addButton = new Button();
             removeButton = new Button();
             saveButton = new Button();
@@ -103,6 +104,7 @@
             quantityInput.Size = new Size(200, 23);
             quantityInput.TabIndex = 4;
             quantityInput.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            quantityInput.ValueChanged += Editor_ValueChanged;
             //
             // purchasedCheckBox
             //
@@ -114,14 +116,24 @@
             purchasedCheckBox.TabIndex = 5;
             purchasedCheckBox.Text = "&Purchased";
             purchasedCheckBox.UseVisualStyleBackColor = true;
+            purchasedCheckBox.CheckedChanged += Editor_ValueChanged;
+            // newButton
+            newButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            newButton.Location = new Point(24, 472);
+            newButton.Name = "newButton";
+            newButton.Size = new Size(90, 32);
+            newButton.TabIndex = 6;
+            newButton.Text = "&New";
+            newButton.UseVisualStyleBackColor = true;
+            newButton.Click += NewButton_Click;
             //
             // addButton
             //
             addButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            addButton.Location = new Point(24, 472);
+            addButton.Location = new Point(124, 472);
             addButton.Name = "addButton";
             addButton.Size = new Size(90, 32);
-            addButton.TabIndex = 6;
+            addButton.TabIndex = 7;
             addButton.Text = "&Add";
             addButton.UseVisualStyleBackColor = true;
             addButton.Click += AddButton_Click;
@@ -129,10 +141,10 @@
             // removeButton
             //
             removeButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            removeButton.Location = new Point(224, 472);
+            removeButton.Location = new Point(324, 472);
             removeButton.Name = "removeButton";
             removeButton.Size = new Size(90, 32);
-            removeButton.TabIndex = 8;
+            removeButton.TabIndex = 9;
             removeButton.Text = "&Remove";
             removeButton.UseVisualStyleBackColor = true;
             removeButton.Click += RemoveButton_Click;
@@ -140,10 +152,10 @@
             // saveButton
             //
             saveButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            saveButton.Location = new Point(124, 472);
+            saveButton.Location = new Point(224, 472);
             saveButton.Name = "saveButton";
             saveButton.Size = new Size(90, 32);
-            saveButton.TabIndex = 7;
+            saveButton.TabIndex = 8;
             saveButton.Text = "&Save";
             saveButton.UseVisualStyleBackColor = true;
             saveButton.Click += SaveButton_Click;
@@ -154,7 +166,7 @@
             refreshButton.Location = new Point(676, 472);
             refreshButton.Name = "refreshButton";
             refreshButton.Size = new Size(100, 32);
-            refreshButton.TabIndex = 9;
+            refreshButton.TabIndex = 10;
             refreshButton.Text = "Re&fresh";
             refreshButton.UseVisualStyleBackColor = true;
             refreshButton.Click += RefreshButton_Click;
@@ -165,7 +177,7 @@
             statusLabel.Location = new Point(24, 521);
             statusLabel.Name = "statusLabel";
             statusLabel.Size = new Size(752, 55);
-            statusLabel.TabIndex = 10;
+            statusLabel.TabIndex = 11;
             statusLabel.Text = "Open the list to load saved items.";
             //
             // itemNameTextBox
@@ -174,9 +186,10 @@
             itemNameTextBox.Location = new Point(24, 362);
             itemNameTextBox.AccessibleName = "Item name";
             itemNameTextBox.Name = "itemNameTextBox";
+            itemNameTextBox.MaxLength = 80;
             itemNameTextBox.Size = new Size(752, 23);
             itemNameTextBox.TabIndex = 2;
-            itemNameTextBox.TextChanged += ItemNameTextBox_TextChanged;
+            itemNameTextBox.TextChanged += Editor_ValueChanged;
             //
             // ShoppingListForm
             //
@@ -193,6 +206,7 @@
             Controls.Add(saveButton);
             Controls.Add(removeButton);
             Controls.Add(addButton);
+            Controls.Add(newButton);
             Controls.Add(purchasedCheckBox);
             Controls.Add(quantityInput);
             Controls.Add(quantityLabel);
@@ -216,6 +230,7 @@
         private NumericUpDown quantityInput;
         private CheckBox purchasedCheckBox;
         private Button addButton;
+        private Button newButton;
         private Button removeButton;
         private Button saveButton;
         private Button refreshButton;

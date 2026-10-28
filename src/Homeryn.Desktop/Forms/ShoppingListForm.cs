@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -9,15 +9,20 @@ namespace Homeryn.Desktop.Forms
 {
     public partial class ShoppingListForm : Form
     {
-        private readonly ShoppingListClient client = new ShoppingListClient();
+        private readonly ShoppingListClient client;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private readonly BindingList<ShoppingItem> items = new BindingList<ShoppingItem>();
         private bool isBusy;
         private bool requiresRefresh = true;
         private bool isUpdatingSelection;
 
-        public ShoppingListForm()
+        public ShoppingListForm() : this(new ShoppingListClient())
         {
+        }
+
+        public ShoppingListForm(ShoppingListClient client)
+        {
+            this.client = client;
             InitializeComponent();
             ConfigureItemsGrid();
             UpdateButtons();
@@ -79,20 +84,37 @@ namespace Homeryn.Desktop.Forms
             ShoppingItem? item = GetSelectedItem();
             if (item != null)
             {
+                isUpdatingSelection = true;
                 itemNameTextBox.Text = item.Name;
                 quantityInput.Value = item.Quantity;
                 purchasedCheckBox.Checked = item.IsPurchased;
+                isUpdatingSelection = false;
             }
             UpdateButtons();
         }
 
-        private void ItemNameTextBox_TextChanged(object? sender, EventArgs e)
+        private void Editor_ValueChanged(object? sender, EventArgs e)
         {
             UpdateButtons();
+            if (!isBusy && !isUpdatingSelection && !requiresRefresh)
+            {
+                if (HasUnsavedChanges())
+                {
+                    statusLabel.Text = "Unsaved changes. Use Add or Save to keep them, or New to discard them.";
+                }
+                else
+                {
+                    ShowListStatus("No unsaved changes.");
+                }
+            }
         }
 
         private async void AddButton_Click(object? sender, EventArgs e)
         {
+            if (requiresRefresh || GetSelectedItem() != null)
+            {
+                return;
+            }
             await RunOperationAsync(async () =>
             {
                 ShoppingItem item = await client.AddAsync(ReadInput(), lifetime.Token);
@@ -110,7 +132,7 @@ namespace Homeryn.Desktop.Forms
         private async void SaveButton_Click(object? sender, EventArgs e)
         {
             ShoppingItem? selected = GetSelectedItem();
-            if (selected == null)
+            if (selected == null || requiresRefresh)
             {
                 return;
             }
@@ -156,7 +178,46 @@ namespace Homeryn.Desktop.Forms
 
         private async void RefreshButton_Click(object? sender, EventArgs e)
         {
+            if (isBusy || !ConfirmDiscardChanges())
+            {
+                return;
+            }
             await RunOperationAsync(RefreshItemsAsync);
+        }
+
+        private void NewButton_Click(object? sender, EventArgs e)
+        {
+            if (isBusy || !ConfirmDiscardChanges())
+            {
+                return;
+            }
+            isUpdatingSelection = true;
+            ResetEditor();
+            UpdateButtons();
+            if (requiresRefresh)
+            {
+                RequireRefresh("The list is not up to date.");
+            }
+            else
+            {
+                ShowListStatus("New item.");
+            }
+            itemNameTextBox.Focus();
+        }
+
+        private bool HasUnsavedChanges()
+        {
+            ShoppingItem? selected = GetSelectedItem();
+            return itemNameTextBox.Text != (selected?.Name ?? "")
+                || quantityInput.Value != (selected?.Quantity ?? 1)
+                || purchasedCheckBox.Checked != (selected?.IsPurchased ?? false);
+        }
+
+        private bool ConfirmDiscardChanges()
+        {
+            return !HasUnsavedChanges() || MessageBox.Show(this,
+                "Discard the unsaved changes in the editor?", "Shopping list",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
         }
 
         private async Task RefreshItemsAsync()
@@ -197,6 +258,7 @@ namespace Homeryn.Desktop.Forms
                 return;
             }
             isBusy = true;
+            statusLabel.Text = "Contacting the server...";
             UpdateButtons();
             try
             {
@@ -270,17 +332,41 @@ namespace Homeryn.Desktop.Forms
 
         private void UpdateButtons()
         {
+            if (isUpdatingSelection)
+            {
+                return;
+            }
             bool canChange = !isBusy && !requiresRefresh;
             bool hasName = !string.IsNullOrWhiteSpace(itemNameTextBox.Text);
             bool hasSelection = GetSelectedItem() != null;
-            addButton.Enabled = canChange && hasName;
-            saveButton.Enabled = canChange && hasName && hasSelection;
+            bool hasChanges = HasUnsavedChanges();
+            addButton.Enabled = canChange && hasName && !hasSelection;
+            saveButton.Enabled = canChange && hasName && hasSelection && hasChanges;
             removeButton.Enabled = canChange && hasSelection;
             refreshButton.Enabled = !isBusy;
-            itemsGrid.Enabled = !isBusy;
+            newButton.Enabled = !isBusy;
+            // Keep the selected record stable while its editor contains a draft.
+            isUpdatingSelection = true;
+            itemsGrid.Enabled = !isBusy && !hasChanges;
+            if (!hasSelection)
+            {
+                // Enabling a bound grid can select its first row automatically.
+                itemsGrid.ClearSelection();
+                itemsGrid.CurrentCell = null;
+            }
+            isUpdatingSelection = false;
             itemNameTextBox.Enabled = !isBusy;
             quantityInput.Enabled = !isBusy;
             purchasedCheckBox.Enabled = !isBusy;
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing && !isBusy && !ConfirmDiscardChanges())
+            {
+                e.Cancel = true;
+            }
+            base.OnFormClosing(e);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
