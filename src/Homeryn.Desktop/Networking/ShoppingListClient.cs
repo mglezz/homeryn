@@ -18,11 +18,13 @@ namespace Homeryn.Desktop.Networking
 
         public async Task<List<ShoppingItem>> ReadAllAsync(CancellationToken cancellationToken = default)
         {
+            using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(TcpClientService.OperationTimeout);
             List<ShoppingItem> items = new List<ShoppingItem>();
             RequestMessage request = new RequestMessage(ShoppingCommands.List);
             while (true)
             {
-                ResponseMessage response = await SendAsync(request, cancellationToken);
+                ResponseMessage response = await SendAsync(request, timeout.Token);
                 ShoppingPage? page = response.Page;
                 if (page == null || page.Items == null || page.Items.Count > ShoppingPage.PageSize
                     || page.UpperBoundId < 0
@@ -45,7 +47,8 @@ namespace Homeryn.Desktop.Networking
                 {
                     return items;
                 }
-                if (page.Items.Count == 0 || page.NextAfterId != lastId || lastId <= request.AfterItemId)
+                if (page.Items.Count == 0 || page.NextAfterId != lastId || lastId <= request.AfterItemId
+                    || lastId >= page.UpperBoundId)
                 {
                     throw new JsonException("The shopping page cursor did not advance.");
                 }
@@ -60,6 +63,10 @@ namespace Homeryn.Desktop.Networking
             request.Item = input;
             ResponseMessage response = await SendAsync(request, cancellationToken);
             ValidateItem(response.Item);
+            if (response.Item!.Version != 1)
+            {
+                throw new JsonException("The server returned an unexpected initial item version.");
+            }
             return response.Item!;
         }
 
@@ -104,7 +111,7 @@ namespace Homeryn.Desktop.Networking
         private static void ValidateItem(ShoppingItem? item)
         {
             if (item == null || item.Id <= 0 || item.Version <= 0 || string.IsNullOrWhiteSpace(item.Name)
-                || item.Name.Length > 80 || item.Quantity < 1 || item.Quantity > 999)
+                || item.Name.Length > 80 || item.Name.Any(char.IsControl) || item.Quantity < 1 || item.Quantity > 999)
             {
                 throw new JsonException("The server returned an invalid shopping item.");
             }

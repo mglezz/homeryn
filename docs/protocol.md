@@ -15,6 +15,8 @@ The length counts payload bytes only. After detecting the beginning of a frame, 
 
 Serialization uses `System.Text.Json` web defaults: output property names use camel case, and input property names are case-insensitive. Unrecognized properties are tolerated. Message boundaries depend on the length prefix, not line delimiters or TCP packet sizes.
 
+Non-optional constructor fields must be present, using [required constructor parameter validation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/required-properties). Stored records require every field, including purchase/completion flags and explicit null values for nullable chore fields. Pages require `items`, `upperBoundId`, and `nextAfterId`. Missing fields are rejected instead of silently becoming false, zero, or null. Optional request fields keep their documented defaults.
+
 ## Messages
 
 Request payload:
@@ -117,6 +119,8 @@ Chore errors are `INVALID_CHORE` for a missing payload, `INVALID_NAME`, `INVALID
 A connection supports multiple sequential requests, with one response per complete valid-length request frame. Responses preserve request order. Concurrent writers on the same stream, request identifiers, unsolicited events, and retries are not supported.
 
 Each desktop request performs one exchange. Diagnostic success requires `PONG` with a null or absent error value; shopping success requires `OK` and the expected data. The connection closes after success, failure, cancellation, or timeout. A mutation may have committed before a connection failure; refresh before repeating it. Requests do not have idempotency keys.
+
+Each exchange has a five-second deadline. Loading a complete shopping or chore list also shares one five-second deadline across all pages, so receiving another page cannot keep the form busy indefinitely. An unfinished refresh leaves the previously displayed list intact. Creation responses must have version 1, and a continuation cursor must remain below the fixed upper boundary.
 
 ```mermaid
 sequenceDiagram

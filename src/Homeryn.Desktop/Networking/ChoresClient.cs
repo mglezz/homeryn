@@ -18,11 +18,13 @@ namespace Homeryn.Desktop.Networking
 
         public async Task<List<Chore>> ReadAllAsync(CancellationToken cancellationToken = default)
         {
+            using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(TcpClientService.OperationTimeout);
             List<Chore> items = new List<Chore>();
             RequestMessage request = new RequestMessage(ChoreCommands.List);
             while (true)
             {
-                ResponseMessage response = await SendAsync(request, cancellationToken);
+                ResponseMessage response = await SendAsync(request, timeout.Token);
                 ChorePage? page = response.ChorePage;
                 if (page == null || page.Items == null || page.Items.Count > ChorePage.PageSize
                     || page.UpperBoundId < 0
@@ -45,7 +47,8 @@ namespace Homeryn.Desktop.Networking
                 {
                     return items;
                 }
-                if (page.Items.Count == 0 || page.NextAfterId != lastId || lastId <= request.AfterChoreId)
+                if (page.Items.Count == 0 || page.NextAfterId != lastId || lastId <= request.AfterChoreId
+                    || lastId >= page.UpperBoundId)
                 {
                     throw new JsonException("The chore page cursor did not advance.");
                 }
@@ -60,6 +63,10 @@ namespace Homeryn.Desktop.Networking
             request.Chore = input;
             ResponseMessage response = await SendAsync(request, cancellationToken);
             ValidateItem(response.Chore);
+            if (response.Chore!.Version != 1)
+            {
+                throw new JsonException("The server returned an unexpected initial chore version.");
+            }
             return response.Chore!;
         }
 

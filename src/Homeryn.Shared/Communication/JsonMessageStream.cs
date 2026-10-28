@@ -6,6 +6,10 @@ namespace Homeryn.Shared.Communication
     public static class JsonMessageStream
     {
         public const int MaximumPayloadBytes = 4096;
+        private static readonly JsonSerializerOptions options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            RespectRequiredConstructorParameters = true
+        };
 
         public static async Task<T?> ReadAsync<T>(Stream stream, CancellationToken cancellationToken)
             where T : class
@@ -27,7 +31,7 @@ namespace Homeryn.Shared.Communication
 
             byte[] payload = new byte[length];
             await stream.ReadExactlyAsync(payload, cancellationToken);
-            T? message = JsonSerializer.Deserialize<T>(payload, JsonSerializerOptions.Web);
+            T? message = JsonSerializer.Deserialize<T>(payload, options);
             if (message == null)
             {
                 throw new JsonException("A JSON message must not be null.");
@@ -38,7 +42,7 @@ namespace Homeryn.Shared.Communication
 
         public static async Task WriteAsync<T>(Stream stream, T message, CancellationToken cancellationToken)
         {
-            byte[] payload = JsonSerializer.SerializeToUtf8Bytes(message, JsonSerializerOptions.Web);
+            byte[] payload = JsonSerializer.SerializeToUtf8Bytes(message, options);
             if (payload.Length > MaximumPayloadBytes)
             {
                 throw new InvalidDataException("The JSON payload exceeds the permitted length.");
