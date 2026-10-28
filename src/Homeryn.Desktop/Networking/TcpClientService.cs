@@ -7,6 +7,8 @@ namespace Homeryn.Desktop.Networking
 {
     public class TcpClientService
     {
+        public static readonly TimeSpan OperationTimeout = TimeSpan.FromSeconds(5);
+
         public async Task PingAsync(
             string host = "127.0.0.1",
             int port = 5000,
@@ -26,7 +28,7 @@ namespace Homeryn.Desktop.Networking
             CancellationToken cancellationToken = default)
         {
             using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeout.CancelAfter(TimeSpan.FromSeconds(5));
+            timeout.CancelAfter(OperationTimeout);
 
             using TcpClient client = new TcpClient();
             await client.ConnectAsync(host, port, timeout.Token);

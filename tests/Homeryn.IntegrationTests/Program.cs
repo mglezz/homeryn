@@ -187,6 +187,7 @@ try
     passed += await ShoppingListTests.RunAsync(testDirectory, token);
     passed += await ChoresTests.RunAsync(testDirectory, token);
     passed += await DatabaseMigrationTests.RunAsync(testDirectory, token);
+    passed += await ClientResponseTests.RunAsync(token);
     Console.WriteLine($"PASS: {passed} integration checks.");
 }
 catch (Exception exception)
