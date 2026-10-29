@@ -1,5 +1,13 @@
 # Development log
 
+## 2026-10-29 — First portable local release
+
+I prepared version 0.1.0 as a scoped Windows x64 release. I added adjacent-server discovery, shared assembly version metadata, and reproducible self-contained packaging. The archive contains the runtime, user guide, dependency inventory, and upstream notices; SHA-256 checksums accompany the download. A tag workflow validates the version and runs build, integration, and extracted-package checks before publication.
+
+I added an online SQLite backup command that stages and integrity-checks a copy before publishing a new filename. It refuses overwrites and opens sources read-only. Regression tests recover shopping and chores from an active WAL database, preserve the original, and reject missing, corrupt, or unsafe destinations. The package smoke test also exercises command-line backup and recovery through the native executable.
+
+I expanded editor coverage for stale updates made by a second client and refresh recovery. I refreshed the README with an original SVG banner, badges, downloads, and focused documentation, plus contribution and issue templates. I rendered and inspected the banner. The Windows Computer Use helper was unavailable after retries, so I did not claim a new complete visual review. Code signing, physical clean-machine testing, full DPI/accessibility coverage, and prolonged-load testing remain explicit release limitations.
+
 ## 2026-10-28 — Safer desktop editing
 
 I aligned shopping creation/editing with chores by adding New and disabling Add for selected records. I tracked editable fields, disabled row changes while a draft exists, and added confirmation before New, Refresh, or an idle user close discards edits. Save is disabled when nothing changed, and text inputs use the server's length limits.

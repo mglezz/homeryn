@@ -16,6 +16,9 @@ The root README and future release notes use clear, approachable language for pe
 | [Development log](development-log.md) | Investigation, problems, decisions, and verification evidence. |
 | [Verification](../tests/README.md) | Executable integration checks and their limits. |
 | [Local stabilization](stabilization.md) | Verified scope and remaining work before a local release. |
+| [User guide](user-guide.md) | Portable setup, editing, updates, backups, and recovery. |
+| [Release process](releasing.md) | Versioning, package checks, tags, and publication. |
+| [0.1.0 release notes](releases/v0.1.0.md) | First local release features and limitations. |
 
 ## Reference material
 

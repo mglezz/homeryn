@@ -1,47 +1,83 @@
-# Homeryn
+﻿<p align="center">
+  <img src="docs/assets/banner.svg" alt="Homeryn — Your home, in sync. Shopping lists and household chores in one place." width="100%" />
+</p>
 
-### Your home, in sync.
+<p align="center">
+  <a href="https://github.com/mglezz/homeryn/actions/workflows/verify.yml"><img src="https://github.com/mglezz/homeryn/actions/workflows/verify.yml/badge.svg" alt="Build, integration tests and package verification" /></a>
+  <a href="https://github.com/mglezz/homeryn/releases/latest"><img src="https://img.shields.io/github/v/release/mglezz/homeryn?color=24856d" alt="Latest release" /></a>
+  <img src="https://img.shields.io/badge/Windows_11-x64-18565b" alt="Windows 11 x64" />
+  <img src="https://img.shields.io/badge/.NET-10-512BD4" alt=".NET 10" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-64748b" alt="MIT license" /></a>
+</p>
 
-Homeryn is a project to make sharing a home a little easier. The aim is to bring shopping lists, household chores, and shared responsibilities into one place, so there is less to remember and less to chase up.
+<p align="center">
+  <a href="https://github.com/mglezz/homeryn/releases/latest"><strong>Download for Windows</strong></a> ·
+  <a href="docs/user-guide.md">User guide</a> ·
+  <a href="docs/README.md">Engineering docs</a> ·
+  <a href="https://github.com/mglezz/homeryn/issues">Report a problem</a>
+</p>
 
-From adding milk to the shopping list to checking whose turn it is to clean the kitchen, everyday coordination should be simple.
+## A little less to remember
 
-## What's planned?
+Homeryn keeps the shopping list and the housework together. Add milk, change a quantity, assign the kitchen to someone, or mark a chore as done. Everything stays saved for next time.
 
-- Share shopping lists with the people at home.
-- Add products and mark them as bought.
-- Create chores, assign them, and mark them as done.
-- Keep everyone in a household up to date.
-- Save household information for the next time the app is opened.
+**Version 0.1.0 is a local Windows app.** Several desktop windows can share the same server on one computer. Accounts and access from other devices are future work.
 
-Homeryn is intended for families, couples, and roommates. Shopping lists and chores are working locally; household accounts are still planned.
+| Shopping | Chores | Built to keep your changes |
+| --- | --- | --- |
+| Add items and quantities | Set an optional responsible person | Save locally with SQLite |
+| Mark purchases and undo them | Add an optional due date | Reject stale edits from another window |
+| Edit or remove entries | Complete or reopen tasks | Protect unsaved drafts and create backups |
 
-## Project status
+## Up and running
 
-**Shared shopping lists and chores are working. Homeryn is being stabilized for local use; it is not a release yet.**
+1. Download **Homeryn-0.1.0-win-x64.zip** from [Releases](https://github.com/mglezz/homeryn/releases/latest).
+2. Extract the **whole ZIP**, keeping the `server` folder beside the desktop executable.
+3. Open **Homeryn.Desktop.exe**, click **Start server**, then choose **Shopping list** or **Chores**.
 
-The shopping window lets you add items, change quantities, mark purchases, and remove items. Your list stays saved when the app and server close. Several copies of the desktop app can use the same local server.
+The .NET runtime is included. No SDK or Visual Studio is needed. The package is unsigned; the release includes a SHA-256 checksum and third-party notices. See the [user guide](docs/user-guide.md) for requirements, updates, and troubleshooting.
 
-Use **Start server**, then **Shopping list**. Enter an item and quantity and click **Add**. Select a row to change it and click **Save**, or use **Remove**. Click **Refresh** to see changes from another window. If someone has already changed the same item, the app asks you to refresh before trying again.
+### A few useful habits
 
-Use **New** in either list to start another entry. While you have unsaved changes, row selection is paused to protect the editor. New, Refresh, and closing the window ask before discarding changes; **No** keeps your draft. Save is available only after a selected entry changes.
+- **Add** creates an entry. Select a row, edit it, and **Save** to update it.
+- **New** starts a fresh entry. Unsaved changes are protected before clearing, refreshing, or closing an idle editor.
+- **Refresh** loads changes from other windows; synchronization is manual.
+- After a conflict or an uncertain result, refresh before trying again.
+- Back up before an update. The [backup and recovery guide](docs/user-guide.md#back-up) keeps the original data intact.
 
-Open **Chores** to add a task with an optional responsible person and due date. Select a row, edit its details or check **Completed**, then click **Save**. Uncheck Completed to reopen it. **New** clears the editor; **Remove** asks for confirmation. Responsible people are free-text names until household accounts exist. Tasks stay saved after a restart.
+## Local by design
 
-The solution must be built first; setup instructions are in the [development guide](docs/development.md). **Check connection** is still available to check the server. There is one shopping list and one chore list per server, all on one computer. Accounts, invitations, separate households, and access from other devices are not available yet.
+The server listens on `127.0.0.1:5000`. Data lives in `%LOCALAPPDATA%\Homeryn\server\homeryn.db`, separate from the app folder. The server continues running after Desktop closes; stop it with Ctrl+C in its console.
+
+There is one shopping list and one chore list per server. Assignees are free-text names. This release has **no accounts, household permissions, cloud/LAN access, recurring tasks, or reminders**. Use it on a trusted computer. Read the [release notes](docs/releases/v0.1.0.md) for the tested scope and remaining limitations.
+
+## For developers
+
+Windows and the .NET 10 SDK are required to build:
+
+```powershell
+dotnet build Homeryn.slnx --configuration Release --warnaserror
+dotnet run --project tests/Homeryn.IntegrationTests --configuration Release --no-build
+```
+
+The console runner checks framing, concurrency, persistence, migrations, malformed responses, editor behavior, and backup recovery. `dotnet test` does not execute it. CI also builds and smoke-tests the portable ZIP before integration.
+
+```text
+Windows Forms desktop  -- framed JSON / TCP -->  Local server  -->  SQLite
+Shopping · Chores                               Validation         Persistence
+Draft protection                               Version checks     Backups
+```
+
+| Explore | Purpose |
+| --- | --- |
+| [Development guide](docs/development.md) | Setup, conventions, and Git workflow |
+| [Architecture](docs/architecture.md) · [Protocol](docs/protocol.md) | How the parts fit together |
+| [Verification](tests/README.md) | Automated checks and manual evidence |
+| [Release process](docs/releasing.md) | Build, test, tag, and publish |
+| [Contributing](CONTRIBUTING.md) | Focused changes and useful bug reports |
 
 ## Why Homeryn?
 
-I started Homeryn as my final project for Distributed Systems and Parallel Programming. I also want to keep developing it into a useful application and a project for my portfolio.
+I started Homeryn as my final project for Distributed Systems and Parallel Programming. I also want to grow it into a useful application and a project for my portfolio: small steps, understandable decisions, and features that work from end to end.
 
-The approach is to start small, understand each decision, and add features step by step.
-
-## Follow the progress
-
-Design notes, setup instructions, and the development record are available in the [engineering documentation](docs/README.md).
-
-The [stabilization checklist](docs/stabilization.md) records what has been verified and what remains before a local release. Windows CI builds the solution and runs the integration checks on every pull request.
-
-Recurring chores, reminders, and access from more devices are possible future additions. There are no commitments to those features or a release date.
-
-**Homeryn — Your home, in sync.**
+Made by [Marcos González Hidalgo](https://github.com/mglezz). Homeryn's code is available under the [MIT license](LICENSE).
