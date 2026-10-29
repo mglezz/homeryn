@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -9,15 +9,20 @@ namespace Homeryn.Desktop.Forms
 {
     public partial class ChoresForm : Form
     {
-        private readonly ChoresClient client = new ChoresClient();
+        private readonly ChoresClient client;
         private readonly CancellationTokenSource lifetime = new CancellationTokenSource();
         private readonly BindingList<Chore> items = new BindingList<Chore>();
         private bool isBusy;
         private bool requiresRefresh = true;
         private bool isUpdatingSelection;
 
-        public ChoresForm()
+        public ChoresForm() : this(new ChoresClient())
         {
+        }
+
+        public ChoresForm(ChoresClient client)
+        {
+            this.client = client;
             InitializeComponent();
             ConfigureItemsGrid();
             UpdateButtons();
@@ -91,18 +96,31 @@ namespace Homeryn.Desktop.Forms
             Chore? item = GetSelectedItem();
             if (item != null)
             {
+                isUpdatingSelection = true;
                 itemNameTextBox.Text = item.Name;
                 assigneeTextBox.Text = item.Assignee ?? "";
                 dueDatePicker.Value = item.DueDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Today;
                 dueDatePicker.Checked = item.DueDate.HasValue;
                 completedCheckBox.Checked = item.IsCompleted;
+                isUpdatingSelection = false;
             }
             UpdateButtons();
         }
 
-        private void ItemNameTextBox_TextChanged(object? sender, EventArgs e)
+        private void Editor_ValueChanged(object? sender, EventArgs e)
         {
             UpdateButtons();
+            if (!isBusy && !isUpdatingSelection && !requiresRefresh)
+            {
+                if (HasUnsavedChanges())
+                {
+                    statusLabel.Text = "Unsaved changes. Use Add or Save to keep them, or New to discard them.";
+                }
+                else
+                {
+                    ShowListStatus("No unsaved changes.");
+                }
+            }
         }
 
         private async void AddButton_Click(object? sender, EventArgs e)
@@ -174,19 +192,52 @@ namespace Homeryn.Desktop.Forms
 
         private void NewButton_Click(object? sender, EventArgs e)
         {
-            if (isBusy)
+            if (isBusy || !ConfirmDiscardChanges())
             {
                 return;
             }
             isUpdatingSelection = true;
             ResetEditor();
             UpdateButtons();
+            if (requiresRefresh)
+            {
+                RequireRefresh("The list is not up to date.");
+            }
+            else
+            {
+                ShowListStatus("New chore.");
+            }
             itemNameTextBox.Focus();
         }
 
         private async void RefreshButton_Click(object? sender, EventArgs e)
         {
+            if (isBusy || !ConfirmDiscardChanges())
+            {
+                return;
+            }
             await RunOperationAsync(RefreshItemsAsync);
+        }
+
+        private bool HasUnsavedChanges()
+        {
+            Chore? selected = GetSelectedItem();
+            DateOnly? dueDate = null;
+            if (dueDatePicker.Checked)
+            {
+                dueDate = DateOnly.FromDateTime(dueDatePicker.Value);
+            }
+            return itemNameTextBox.Text != (selected?.Name ?? "")
+                || assigneeTextBox.Text != (selected?.Assignee ?? "")
+                || dueDate != selected?.DueDate
+                || completedCheckBox.Checked != (selected?.IsCompleted ?? false);
+        }
+
+        private bool ConfirmDiscardChanges()
+        {
+            return !HasUnsavedChanges() || MessageBox.Show(this,
+                "Discard the unsaved changes in the editor?", "Chores",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
         }
 
         private async Task RefreshItemsAsync()
@@ -310,19 +361,42 @@ namespace Homeryn.Desktop.Forms
 
         private void UpdateButtons()
         {
+            if (isUpdatingSelection)
+            {
+                return;
+            }
             bool canChange = !isBusy && !requiresRefresh;
             bool hasName = !string.IsNullOrWhiteSpace(itemNameTextBox.Text);
             bool hasSelection = GetSelectedItem() != null;
+            bool hasChanges = HasUnsavedChanges();
             addButton.Enabled = canChange && hasName && !hasSelection;
-            saveButton.Enabled = canChange && hasName && hasSelection;
+            saveButton.Enabled = canChange && hasName && hasSelection && hasChanges;
             removeButton.Enabled = canChange && hasSelection;
             refreshButton.Enabled = !isBusy;
-            itemsGrid.Enabled = !isBusy;
+            // Keep the selected record stable while its editor contains a draft.
+            isUpdatingSelection = true;
+            itemsGrid.Enabled = !isBusy && !hasChanges;
+            if (!hasSelection)
+            {
+                // Enabling a bound grid can select its first row automatically.
+                itemsGrid.ClearSelection();
+                itemsGrid.CurrentCell = null;
+            }
+            isUpdatingSelection = false;
             itemNameTextBox.Enabled = !isBusy;
             assigneeTextBox.Enabled = !isBusy;
             dueDatePicker.Enabled = !isBusy;
             newButton.Enabled = !isBusy;
             completedCheckBox.Enabled = !isBusy;
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing && !isBusy && !ConfirmDiscardChanges())
+            {
+                e.Cancel = true;
+            }
+            base.OnFormClosing(e);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)

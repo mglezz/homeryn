@@ -72,10 +72,11 @@ namespace Homeryn.Desktop.Forms
             itemNameTextBox.Location = new Point(24, 362);
             itemNameTextBox.MaxLength = 80;
             itemNameTextBox.Name = "itemNameTextBox";
+            itemNameTextBox.MaxLength = 80;
             itemNameTextBox.Size = new Size(752, 23);
             itemNameTextBox.TabIndex = 2;
             itemNameTextBox.AccessibleName = "Chore name";
-            itemNameTextBox.TextChanged += ItemNameTextBox_TextChanged;
+            itemNameTextBox.TextChanged += Editor_ValueChanged;
             // assigneeLabel
             assigneeLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             assigneeLabel.AutoSize = true;
@@ -88,6 +89,8 @@ namespace Homeryn.Desktop.Forms
             assigneeTextBox.Location = new Point(24, 426);
             assigneeTextBox.MaxLength = 60;
             assigneeTextBox.Name = "assigneeTextBox";
+            assigneeTextBox.MaxLength = 60;
+            assigneeTextBox.TextChanged += Editor_ValueChanged;
             assigneeTextBox.Size = new Size(290, 23);
             assigneeTextBox.TabIndex = 4;
             assigneeTextBox.AccessibleName = "Responsible person (optional)";
@@ -107,6 +110,7 @@ namespace Homeryn.Desktop.Forms
             dueDatePicker.MaxDate = new DateTime(9998, 12, 31);
             dueDatePicker.Location = new Point(338, 426);
             dueDatePicker.Name = "dueDatePicker";
+            dueDatePicker.ValueChanged += Editor_ValueChanged;
             dueDatePicker.Size = new Size(200, 23);
             dueDatePicker.TabIndex = 6;
             dueDatePicker.AccessibleName = "Due date (optional)";
@@ -115,6 +119,7 @@ namespace Homeryn.Desktop.Forms
             completedCheckBox.AutoSize = true;
             completedCheckBox.Location = new Point(565, 428);
             completedCheckBox.Name = "completedCheckBox";
+            completedCheckBox.CheckedChanged += Editor_ValueChanged;
             completedCheckBox.Text = "Co&mpleted";
             completedCheckBox.TabIndex = 7;
             completedCheckBox.UseVisualStyleBackColor = true;

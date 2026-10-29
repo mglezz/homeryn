@@ -1,5 +1,13 @@
 # Development log
 
+## 2026-10-28 — Safer desktop editing
+
+I aligned shopping creation/editing with chores by adding New and disabling Add for selected records. I tracked editable fields, disabled row changes while a draft exists, and added confirmation before New, Refresh, or an idle user close discards edits. Save is disabled when nothing changed, and text inputs use the server's length limits.
+
+I checked both windows with isolated data, including purchase/date edits and cancelling discard prompts. Visual inspection exposed automatic first-row selection when a bound grid was re-enabled. I preserved the empty selection and added two real-control regression scenarios with injected clients, ephemeral ports, invisible forms, and STA message loops. The Release build passed without warnings and all 39 checks passed locally. Modal confirmations and visual review remain separate from those automated checks.
+
+I documented the remaining local-release work instead of treating passing checks as a release guarantee. No release tag or package was created.
+
 ## 2026-10-28 — Response validation and repeatable verification
 
 I reviewed and integrated the pending chores and layout branches after a clean Release build and 29 passing checks. I found that constructor-based JSON deserialization could silently supply false or null for omitted stored fields. I enabled required constructor fields while keeping optional request defaults, aligned shopping name validation with chores, and rejected impossible creation versions and continuation cursors.

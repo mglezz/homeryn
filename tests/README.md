@@ -37,17 +37,19 @@ Seven additional checks use isolated SQLite files and the actual shopping client
 - Database lock timeout while PING remains responsive, followed by recovery.
 - Restart persistence for fields, versions, and deletions.
 
-The runner currently contains 37 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+The runner currently contains 39 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
 
 Eight client-response checks use local fake servers to reject missing stored fields, incomplete pages, null records, control characters, invalid identifiers/cursors, and unexpected initial versions. Both list clients must cancel a slow multi-page read within the shared five-second deadline rather than restarting the timeout for every page.
 
-The GitHub Actions `Verify` workflow runs the Release build and this console runner on Windows for every pull request and push to `main`. It also supports manual runs. It does not run interactive Windows Forms checks.
+Two editor checks run real Windows Forms controls on STA message loops against an isolated server. They cover Add/Save separation, dirty fields, draft selection protection, persisted quantity/completion changes, reverting edits, New, and clearing automatic row selection after add, save, and refresh. These forms are invisible and use ephemeral ports; they never use the normal server database. Modal confirmations and visual layout still require interactive verification.
+
+The GitHub Actions `Verify` workflow runs the Release build and this console runner on Windows for every pull request and push to `main`. It also supports manual runs. It does not run interactive visual checks.
 
 Seven chore checks also cover CRUD, trimmed Unicode names and assignees, due dates, completion and reopening, clearing optional fields, validation, stale edits/deletes, concurrent additions, bounded pagination, lock recovery, and restart persistence. Two migration checks verify version-1 shopping preservation, independent chore storage, repeated initialization, and rejection of a newer schema.
 
 ## Interactive verification
 
-The integration runner does not automate Windows Forms. To check the interface with isolated data:
+The integration runner exercises editor controls but does not assess visual layout or modal confirmations. To check the interface with isolated data:
 
 1. Start the server with `--database` pointing to a temporary file, then launch Desktop.
 2. Open Shopping list. Verify that an empty or whitespace-only name disables Add.
@@ -75,3 +77,9 @@ On 2026-10-24, interactive checks with an isolated database covered an empty lis
 9. Resize the form and open its Designer in Visual Studio to inspect the layout.
 
 On 2026-10-25, interactive checks with an isolated database covered the empty list, disabled Add/Save, adding a named and assigned chore without a date, selecting it, saving a due date and completed state, pending/completed counts, editor reset, server-unavailable feedback, and successful Refresh after restart with saved fields preserved. The Chores form also opened successfully in the Visual Studio Designer. Concurrent conflicts, deletion, reopening, and clearing optional fields were covered by the integration runner.
+
+## Draft protection checks
+
+In both list windows, edit a selected row and verify that Add is disabled, Save is enabled, and row selection is paused. Click New, Refresh, or Close and choose No: the fields and selection must stay intact. Choose Yes to discard; New clears the editor, Refresh replaces it only after a successful load, and Close closes the window. Reverting all fields to their loaded values should enable the grid and disable Save without prompting. Repeat using only quantity/purchase changes and only assignee/date/completion changes.
+
+On 2026-10-28, interactive checks with an isolated database covered creating and selecting shopping and chore records, disabled Add during editing, purchase/date changes activating Save, cancellation of shopping Refresh and chore Close preserving drafts, saved fields, and unavailable-server feedback preserving displayed rows. Visual inspection caught automatic grid selection after re-enabling; the corrected behavior is covered by both editor regression checks. The full modal matrix, two-process manual checklist, scaling checks, and Designer recheck remain pending.
