@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build-and-test:
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
         with:
@@ -30,3 +30,19 @@ jobs:
         run: dotnet build Homeryn.slnx --configuration Release --no-restore --warnaserror
       - name: Run integration checks
         run: dotnet run --project tests/Homeryn.IntegrationTests --configuration Release --no-build
+      - name: Build portable package
+        run: ./scripts/Package-Release.ps1
+      - name: Verify extracted package
+        run: |
+          $archive = @(Get-ChildItem artifacts/release/*.zip)
+          if ($archive.Count -ne 1) { throw 'Expected one release archive.' }
+          ./scripts/Test-Package.ps1 -ArchivePath $archive[0].FullName
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows-x64-package
+          path: |
+            artifacts/release/*.zip
+            artifacts/release/SHA256SUMS.txt
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14

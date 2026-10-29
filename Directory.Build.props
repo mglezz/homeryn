@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Authors>Marcos González Hidalgo</Authors>
+    <Product>Homeryn</Product>
+    <Copyright>Copyright © 2026 Marcos González Hidalgo</Copyright>
+    <RepositoryUrl>https://github.com/mglezz/homeryn</RepositoryUrl>
+  </PropertyGroup>
+</Project>

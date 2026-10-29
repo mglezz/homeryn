@@ -10,6 +10,11 @@ namespace Homeryn.Desktop.Hosting
 
         public string? FindExecutable()
         {
+            string bundledServer = Path.Combine(AppContext.BaseDirectory, "server", "Homeryn.Server.exe");
+            if (File.Exists(bundledServer))
+            {
+                return bundledServer;
+            }
             DirectoryInfo? directory = new DirectoryInfo(AppContext.BaseDirectory);
             string configuration = directory.Parent?.Name ?? "Debug";
             while (directory != null)
@@ -44,6 +49,7 @@ namespace Homeryn.Desktop.Hosting
 
         public async Task StartAsync(string executable, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = Path.GetFullPath(executable);
             startInfo.WorkingDirectory = Path.GetDirectoryName(startInfo.FileName)!;

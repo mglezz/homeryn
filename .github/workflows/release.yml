@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Validate release version
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          [xml]$properties = Get-Content Directory.Build.props
+          $version = [string]$properties.Project.PropertyGroup.Version
+          if ($env:RELEASE_TAG -ne "v$version") { throw 'Tag and application version differ.' }
+          if (-not (Test-Path "docs/releases/v$version.md")) { throw 'Release notes are missing.' }
+      - name: Build
+        run: dotnet build Homeryn.slnx --configuration Release --warnaserror
+      - name: Integration checks
+        run: dotnet run --project tests/Homeryn.IntegrationTests --configuration Release --no-build
+      - name: Package
+        run: ./scripts/Package-Release.ps1
+      - name: Test extracted package
+        run: |
+          $archive = @(Get-ChildItem artifacts/release/*.zip)
+          if ($archive.Count -ne 1) { throw 'Expected one release archive.' }
+          ./scripts/Test-Package.ps1 -ArchivePath $archive[0].FullName
+      - name: Publish verified assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $archive = @(Get-ChildItem artifacts/release/*.zip)
+          gh release create $env:RELEASE_TAG $archive[0].FullName artifacts/release/SHA256SUMS.txt --verify-tag --title "Homeryn $env:RELEASE_TAG" --notes-file "docs/releases/$env:RELEASE_TAG.md" --latest
+          if ($LASTEXITCODE -ne 0) { throw 'Release publication failed.' }
