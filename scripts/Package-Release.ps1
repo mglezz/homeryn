@@ -22,6 +22,7 @@ foreach ($project in @('Desktop', 'Server')) {
     if ($LASTEXITCODE -ne 0) { throw "Publishing $project failed." }
 }
 Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE') -Destination $package
+Copy-Item -LiteralPath (Join-Path $repoRoot 'SECURITY.md') -Destination $package
 Copy-Item -LiteralPath (Join-Path $repoRoot 'docs\user-guide.md') -Destination (Join-Path $package 'START-HERE.md')
 Copy-Item -LiteralPath (Join-Path $repoRoot "docs\releases\v$version.md") -Destination (Join-Path $package 'RELEASE-NOTES.md')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'docs\THIRD-PARTY-NOTICES.md') -Destination $package

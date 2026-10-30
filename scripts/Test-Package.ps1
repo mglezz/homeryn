@@ -6,15 +6,31 @@ New-Item -ItemType Directory -Path $scratch | Out-Null
 Expand-Archive -LiteralPath $ArchivePath -DestinationPath $scratch
 $package = @(Get-ChildItem -LiteralPath $scratch -Directory)
 if ($package.Count -ne 1) { throw 'Expected a single top-level package folder.' }
+foreach ($entry in Get-ChildItem -LiteralPath $package[0].FullName -Recurse -Force) {
+    if ($entry.Name -match '(?i)^(\.git|\.vs|\.env(?:\..*)?)$|\.(db(?:-(?:wal|shm|journal))?|sqlite(?:3)?(?:-(?:wal|shm|journal))?|pfx|p12|pem|key|pdb|suo|user|log)$') {
+        throw "Disallowed private, database, or debug file in package: $($entry.Name)"
+    }
+}
 $desktop = Join-Path $package[0].FullName 'Homeryn.Desktop.exe'
 $serverExe = Join-Path $package[0].FullName 'server\Homeryn.Server.exe'
 foreach ($file in @($desktop, $serverExe, (Join-Path $package[0].FullName 'coreclr.dll'), (Join-Path $package[0].FullName 'server\coreclr.dll'))) {
     if (-not (Test-Path -LiteralPath $file)) { throw "Missing self-contained package file: $file" }
 }
+$releaseMetadata = Invoke-RestMethod 'https://builds.dotnet.microsoft.com/dotnet/release-metadata/10.0/releases.json'
+$minimumRuntime = [version]$releaseMetadata.'latest-runtime'
+if ($minimumRuntime.Major -ne 10) { throw 'Unexpected .NET release metadata.' }
 foreach ($runtimeFile in @('Homeryn.Desktop.runtimeconfig.json', 'server\Homeryn.Server.runtimeconfig.json')) {
     $config = Get-Content -LiteralPath (Join-Path $package[0].FullName $runtimeFile) -Raw | ConvertFrom-Json
     if ($config.runtimeOptions.PSObject.Properties.Name -contains 'frameworks' -or $config.runtimeOptions.PSObject.Properties.Name -contains 'framework') {
         throw 'The package unexpectedly depends on a separately installed runtime.'
+    }
+    if ($null -eq $config.runtimeOptions.PSObject.Properties['includedFrameworks'] -or @($config.runtimeOptions.includedFrameworks).Count -eq 0) {
+        throw 'Bundled runtime versions are missing.'
+    }
+    foreach ($framework in $config.runtimeOptions.includedFrameworks) {
+        if ([version]$framework.version -lt $minimumRuntime) {
+            throw "Outdated bundled runtime $($framework.name) $($framework.version); update to $minimumRuntime or later."
+        }
     }
 }
 $database = Join-Path $scratch 'original.db'

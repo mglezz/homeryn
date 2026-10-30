@@ -2,9 +2,9 @@
 
 ## Prerequisites and build
 
-Development requires Windows, the .NET 10 SDK, and Visual Studio with .NET desktop development support. Server and Shared target `net10.0`; Desktop and the integration runner target `net10.0-windows`.
+Development requires Windows, the .NET SDK 10.0.403 (or a later 10.0.4xx patch), and Visual Studio with .NET desktop development support. Server and Shared target `net10.0`; Desktop and the integration runner target `net10.0-windows`.
 
-`global.json` selects the latest installed stable .NET 10 SDK feature band, starting at 10.0.100. GitHub Actions installs the matching SDK and runs the same Release build and integration runner for each pull request and push to `main`. Check the `Verify` workflow before merging; `dotnet test` alone is not a substitute.
+`global.json` requires stable .NET SDK 10.0.403 and permits later patches within that feature band. The bundled runtime is pinned to 10.0.14 in `Directory.Build.props`. GitHub Actions installs the matching SDK and runs the same Release build and integration runner for each pull request and push to `main`. Check the `Verify` workflow before merging; `dotnet test` alone is not a substitute.
 
 Run these commands from the repository root:
 

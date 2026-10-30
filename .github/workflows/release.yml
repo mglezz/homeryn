@@ -18,10 +18,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-dotnet@v6
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
           global-json-file: global.json
       - name: Validate release version
@@ -33,10 +34,14 @@ jobs:
           $version = [string]$properties.Project.PropertyGroup.Version
           if ($env:RELEASE_TAG -ne "v$version") { throw 'Tag and application version differ.' }
           if (-not (Test-Path "docs/releases/v$version.md")) { throw 'Release notes are missing.' }
+          git merge-base --is-ancestor HEAD origin/main
+          if ($LASTEXITCODE -ne 0) { throw 'Release tags must point to commits already merged into main.' }
       - name: Build
         run: dotnet build Homeryn.slnx --configuration Release --warnaserror
       - name: Integration checks
         run: dotnet run --project tests/Homeryn.IntegrationTests --configuration Release --no-build
+      - name: Security checks
+        run: ./scripts/Test-Security.ps1
       - name: Package
         run: ./scripts/Package-Release.ps1
       - name: Test extracted package

@@ -4,6 +4,8 @@ The first supported distribution is a portable, self-contained Windows x64 ZIP. 
 
 ## Prepare and verify
 
+Use SDK 10.0.403 or a newer 10.0.4xx patch. `Directory.Build.props` pins the bundled runtime to 10.0.14. Compare both versions with Microsoft's current .NET 10 release metadata before each release; package verification rejects a bundled framework older than the feed's latest runtime. Also run `./scripts/Test-Security.ps1` after restore/build, using a full Git checkout. Network/audit failures must be resolved before publication.
+
 1. Work on a release branch. Set the version in `Directory.Build.props` and add matching notes under `docs/releases/v<version>.md`. Update the package guide and README download filename for a version change.
 2. Build with warnings treated as errors and run the console integration suite.
 3. Run `./scripts/Package-Release.ps1` from PowerShell. It creates a new ZIP and `SHA256SUMS.txt` under `artifacts/release`. Existing ZIPs are refused; choose a different `-OutputDirectory` for another local build.

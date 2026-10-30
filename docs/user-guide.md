@@ -59,6 +59,8 @@ Continue starting the server with this custom path while using the recovered dat
 
 ## Scope and help
 
+Use Homeryn on a trusted computer without administrator privileges. Other local processes or Windows users can access a running server; there is no client authentication. Databases and backups are unencrypted. Keep them in a private folder, avoid sensitive information in list fields, and never forward the server port to another computer. Read [SECURITY.md](https://github.com/mglezz/homeryn/blob/main/SECURITY.md) for the supported trust boundary.
+
 This release includes one shopping list and one chore list per server, free-text assignees, explicit refresh, persistence, and backups. It has no household accounts, invitations, recurring tasks, reminders, LAN/cloud access, or automatic updates.
 
 Report reproducible problems at https://github.com/mglezz/homeryn/issues. Include the app version, Windows version, steps, and error text. Remove personal names and never attach your database to a public issue.

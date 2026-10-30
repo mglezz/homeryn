@@ -4,6 +4,7 @@ Version 0.1.0 targets one shared shopping list and one chore list on Windows 11 
 
 ## Verified foundation
 
+- Security checks cover Git history, NuGet advisories, packaged private files, and bundled runtime currency. The server enforces loopback, connection limits, and exchange deadlines. See the [security policy](../SECURITY.md) for the local trust boundary and remaining risks.
 - Release builds treat warnings as errors. Windows CI runs the console integration suite on every pull request and push to `main`.
 - Shopping and chores support persistent creation, editing, removal, and reversible purchase/completion state.
 - Version checks reject stale updates and deletes. SQLite lock recovery, restart persistence, and version-1 migration have regression coverage.

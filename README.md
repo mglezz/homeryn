@@ -53,7 +53,7 @@ There is one shopping list and one chore list per server. Assignees are free-tex
 
 ## For developers
 
-Windows and the .NET 10 SDK are required to build:
+Windows and .NET SDK 10.0.403 or a later 10.0.4xx patch are required to build:
 
 ```powershell
 dotnet build Homeryn.slnx --configuration Release --warnaserror
@@ -75,6 +75,7 @@ Draft protection                               Version checks     Backups
 | [Verification](tests/README.md) | Automated checks and manual evidence |
 | [Release process](docs/releasing.md) | Build, test, tag, and publish |
 | [Contributing](CONTRIBUTING.md) | Focused changes and useful bug reports |
+| [Security and privacy](SECURITY.md) | Supported trust boundary, verification, and reporting |
 
 ## Why Homeryn?
 

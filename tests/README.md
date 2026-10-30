@@ -13,6 +13,7 @@ The runner starts the actual server on an ephemeral loopback port, leaving the a
 
 Coverage includes:
 
+- Rejection of non-loopback listeners, expiration of idle/partial frames, and connection-capacity recovery.
 - Successful desktop PING/PONG.
 - A header and payload written one byte at a time.
 - Two frames sent together on one connection.
@@ -37,7 +38,9 @@ Seven additional checks use isolated SQLite files and the actual shopping client
 - Database lock timeout while PING remains responsive, followed by recovery.
 - Restart persistence for fields, versions, and deletions.
 
-The runner currently contains 43 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+The runner currently contains 46 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+
+CI also runs `scripts/Test-Security.ps1`: a checksum-pinned Gitleaks history scan with redacted output and a direct/transitive NuGet advisory audit. Package verification rejects private keys, databases, environment files, debug symbols, and local IDE files. These checks do not certify the absence of all vulnerabilities; see [Security](../SECURITY.md).
 
 Four backup checks restore both lists from an active WAL database, verify independence from later source changes, refuse existing/self destinations, reject missing sources without creating empty databases, and reject invalid sources without publishing a partial copy.
 
