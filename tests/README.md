@@ -13,6 +13,7 @@ The runner starts the actual server on an ephemeral loopback port, leaving the a
 
 Coverage includes:
 
+- Rejection of non-loopback listeners, expiration of idle/partial frames, and connection-capacity recovery.
 - Successful desktop PING/PONG.
 - A header and payload written one byte at a time.
 - Two frames sent together on one connection.
@@ -37,13 +38,17 @@ Seven additional checks use isolated SQLite files and the actual shopping client
 - Database lock timeout while PING remains responsive, followed by recovery.
 - Restart persistence for fields, versions, and deletions.
 
-The runner currently contains 39 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+The runner currently contains 46 checks. It creates unique databases under the temporary directory and removes its test directory after shutdown. It does not use the user's default database.
+
+CI also runs `scripts/Test-Security.ps1`: a checksum-pinned Gitleaks history scan with redacted output and a direct/transitive NuGet advisory audit. Package verification rejects private keys, databases, environment files, debug symbols, and local IDE files. These checks do not certify the absence of all vulnerabilities; see [Security](../SECURITY.md).
+
+Four backup checks restore both lists from an active WAL database, verify independence from later source changes, refuse existing/self destinations, reject missing sources without creating empty databases, and reject invalid sources without publishing a partial copy.
 
 Eight client-response checks use local fake servers to reject missing stored fields, incomplete pages, null records, control characters, invalid identifiers/cursors, and unexpected initial versions. Both list clients must cancel a slow multi-page read within the shared five-second deadline rather than restarting the timeout for every page.
 
 Two editor checks run real Windows Forms controls on STA message loops against an isolated server. They cover Add/Save separation, dirty fields, draft selection protection, persisted quantity/completion changes, reverting edits, New, and clearing automatic row selection after add, save, and refresh. These forms are invisible and use ephemeral ports; they never use the normal server database. Modal confirmations and visual layout still require interactive verification.
 
-The GitHub Actions `Verify` workflow runs the Release build and this console runner on Windows for every pull request and push to `main`. It also supports manual runs. It does not run interactive visual checks.
+The GitHub Actions `Verify` workflow runs the Release build and this console runner on Windows for every pull request and push to `main`. It also packages and tests the extracted self-contained applications outside the repository, covering native startup, TCP CRUD, stale deletion, command-line backup and recovery. It supports manual runs and retains the ZIP as a workflow artifact. It does not run interactive visual checks. See the [release process](../docs/releasing.md).
 
 Seven chore checks also cover CRUD, trimmed Unicode names and assignees, due dates, completion and reopening, clearing optional fields, validation, stale edits/deletes, concurrent additions, bounded pagination, lock recovery, and restart persistence. Two migration checks verify version-1 shopping preservation, independent chore storage, repeated initialization, and rejection of a newer schema.
 

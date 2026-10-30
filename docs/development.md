@@ -2,9 +2,9 @@
 
 ## Prerequisites and build
 
-Development requires Windows, the .NET 10 SDK, and Visual Studio with .NET desktop development support. Server and Shared target `net10.0`; Desktop and the integration runner target `net10.0-windows`.
+Development requires Windows, the .NET SDK 10.0.403 (or a later 10.0.4xx patch), and Visual Studio with .NET desktop development support. Server and Shared target `net10.0`; Desktop and the integration runner target `net10.0-windows`.
 
-`global.json` selects the latest installed stable .NET 10 SDK feature band, starting at 10.0.100. GitHub Actions installs the matching SDK and runs the same Release build and integration runner for each pull request and push to `main`. Check the `Verify` workflow before merging; `dotnet test` alone is not a substitute.
+`global.json` requires stable .NET SDK 10.0.403 and permits later patches within that feature band. The bundled runtime is pinned to 10.0.14 in `Directory.Build.props`. GitHub Actions installs the matching SDK and runs the same Release build and integration runner for each pull request and push to `main`. Check the `Verify` workflow before merging; `dotnet test` alone is not a substitute.
 
 Run these commands from the repository root:
 
@@ -89,7 +89,7 @@ Before integration, inspect the diff, build with warnings treated as errors, and
 
 ## Shopping list and local storage
 
-Build the whole solution before using **Start server**. The launcher finds `Homeryn.Server.exe` under the repository's matching build configuration. If it cannot find the executable, select the built server in the file dialog. It checks PING before starting another process and waits for a response before reporting readiness. This is process startup, not authentication. The server has its own console and continues running after the desktop closes; stop it with Ctrl+C.
+Build the whole solution before using **Start server** from a development build. The launcher first checks the portable package's adjacent `server` folder, then the repository's matching build configuration. If it cannot find the executable, select the built server in the file dialog. It checks PING before starting another process and waits for a response before reporting readiness. This is process startup, not authentication. The server has its own console and continues running after the desktop closes; stop it with Ctrl+C. Release users can run the self-contained ZIP without a development build; see the [user guide](user-guide.md).
 
 The default database is `%LOCALAPPDATA%\Homeryn\server\homeryn.db`. The startup log prints the resolved path. Changing the working directory does not select a different default database. To use isolated test data:
 
@@ -97,7 +97,7 @@ The default database is `%LOCALAPPDATA%\Homeryn\server\homeryn.db`. The startup 
 dotnet run --project src/Homeryn.Server -- --database "$env:TEMP\homeryn-demo\shopping.db"
 ```
 
-The server creates schema version 2 on a new database. Existing version-1 databases are migrated transactionally by adding Chores; shopping data is preserved. Schemas newer than version 2 are rejected. There is no automatic backup facility. Stop the server before copying the database together with any remaining `-wal` and `-shm` files. Do not commit personal shopping data; database files are ignored.
+The server creates schema version 2 on a new database. Existing version-1 databases are migrated transactionally by adding Chores; shopping data is preserved. Schemas newer than version 2 are rejected. `Homeryn.Server.exe --backup <new-file>` creates a consistent, integrity-checked SQLite snapshot and exits, including while the server is active. Add `--database <source>` for a custom source. Existing files are refused. There is no scheduled backup or automatic in-place restore; use the [backup and recovery guide](user-guide.md#back-up). Do not commit personal data; database files are ignored.
 
 Open **Shopping list** to load items. **Add** creates an item from the fields. Selecting a row fills the editor; **Save** updates the selected version, and **Remove** asks for confirmation. **Refresh** reloads the list and clears the editor. Other windows' changes appear on refresh, not automatically. After a conflict or an unconfirmed result, refresh is required before another change.
 

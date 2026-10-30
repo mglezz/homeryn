@@ -4,6 +4,8 @@ The local prototype uses a request/response protocol over TCP for diagnostics, s
 
 ## Framing
 
+Only loopback listeners are supported. At most 64 connections are admitted at once; excess connections are closed. Each exchange has a ten-second deadline covering the read, dispatch, and response write. Idle or incomplete frames expire without resetting the deadline on each byte. Clients may reconnect after a timeout; do not automatically retry a mutation because it may already have committed. These limits do not provide authentication or isolate users on the same computer; see the [security policy](../SECURITY.md).
+
 Each frame has the following structure:
 
 | Field | Size | Encoding |

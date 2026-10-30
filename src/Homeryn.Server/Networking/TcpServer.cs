@@ -7,9 +7,26 @@ namespace Homeryn.Server.Networking
     {
         private readonly TcpListener listener;
         private readonly RequestDispatcher dispatcher;
+        private readonly int maximumClients;
+        private readonly TimeSpan requestTimeout;
 
-        public TcpServer(IPAddress address, int port, RequestDispatcher dispatcher)
+        public TcpServer(IPAddress address, int port, RequestDispatcher dispatcher,
+            int maximumClients = 64, TimeSpan? requestTimeout = null)
         {
+            if (!IPAddress.IsLoopback(address))
+            {
+                throw new ArgumentException("Only loopback addresses are supported.", nameof(address));
+            }
+            if (maximumClients < 1 || maximumClients > 64)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maximumClients));
+            }
+            this.requestTimeout = requestTimeout ?? TimeSpan.FromSeconds(10);
+            if (this.requestTimeout <= TimeSpan.Zero || this.requestTimeout > TimeSpan.FromSeconds(10))
+            {
+                throw new ArgumentOutOfRangeException(nameof(requestTimeout));
+            }
+            this.maximumClients = maximumClients;
             listener = new TcpListener(address, port);
             this.dispatcher = dispatcher;
         }
@@ -43,7 +60,12 @@ namespace Homeryn.Server.Networking
                         }
                     }
 
-                    Task clientTask = ClientHandler.HandleAsync(client, dispatcher, shutdown.Token);
+                    if (clientTasks.Count >= maximumClients)
+                    {
+                        client.Dispose();
+                        continue;
+                    }
+                    Task clientTask = ClientHandler.HandleAsync(client, dispatcher, requestTimeout, shutdown.Token);
                     clientTasks.Add(clientTask);
                 }
             }

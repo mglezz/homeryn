@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="380" viewBox="0 0 1280 380" role="img" aria-labelledby="title desc">
+  <title id="title">Homeryn — Your home, in sync.</title>
+  <desc id="desc">Shopping and chores, together. A calm teal illustration of a home and two checked lists.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#102f34"/><stop offset="1" stop-color="#18565b"/></linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#fff" stroke-opacity=".035"/></pattern>
+  </defs>
+  <rect width="1280" height="380" rx="24" fill="url(#bg)"/>
+  <rect width="1280" height="380" rx="24" fill="url(#grid)"/>
+  <circle cx="1105" cy="60" r="230" fill="#70d6b6" opacity=".06"/>
+  <g font-family="Segoe UI,Arial,sans-serif">
+    <text x="72" y="90" fill="#92dcc8" font-size="15" font-weight="600" letter-spacing="3">A LITTLE LESS TO REMEMBER</text>
+    <text x="68" y="181" fill="#f5fbf8" font-size="76" font-weight="700" letter-spacing="-3">Homeryn</text>
+    <text x="72" y="233" fill="#d3e9e2" font-size="29">Your home, in sync.</text>
+    <text x="72" y="307" fill="#a3c7c1" font-size="18">Shopping lists. Household chores. One place.</text>
+    <g transform="translate(825 70)">
+      <path d="M70 100L180 8l110 92" stroke="#8ad9c1" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M92 92v148h176V92" stroke="#8ad9c1" stroke-opacity=".45" stroke-width="7" stroke-linejoin="round" fill="none"/>
+      <rect x="0" y="104" width="175" height="146" rx="16" fill="#f1f6ec"/>
+      <text x="22" y="137" fill="#21483f" font-size="16" font-weight="700">Shopping</text>
+      <path d="M23 165l6 6 13-14M23 201l6 6 13-14" fill="none" stroke="#24856d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M58 164h83M58 200h57" stroke="#a8c2b6" stroke-width="6" stroke-linecap="round"/>
+      <rect x="194" y="142" width="175" height="126" rx="16" fill="#d7eee5"/>
+      <text x="216" y="176" fill="#21483f" font-size="16" font-weight="700">Chores</text>
+      <circle cx="226" cy="207" r="8" fill="none" stroke="#24856d" stroke-width="2"/>
+      <path d="M250 207h82M216 239h76" stroke="#98bcac" stroke-width="6" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

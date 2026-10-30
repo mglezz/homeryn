@@ -15,13 +15,13 @@ namespace Homeryn.IntegrationTests
         public int Port { get; }
         public ShoppingListClient Client { get; }
 
-        public TestServer(string databasePath)
+        public TestServer(string databasePath, int maximumClients = 64, TimeSpan? requestTimeout = null)
         {
             SqliteShoppingItemRepository repository = new SqliteShoppingItemRepository(databasePath);
             new SqliteDatabase(databasePath).Initialize();
             dispatcher = new RequestDispatcher(new ShoppingListService(repository),
                 new ChoresService(new SqliteChoreRepository(databasePath)));
-            TcpServer server = new TcpServer(IPAddress.Loopback, 0, dispatcher);
+            TcpServer server = new TcpServer(IPAddress.Loopback, 0, dispatcher, maximumClients, requestTimeout);
             serverTask = server.RunAsync(shutdown.Token);
             Port = server.LocalEndpoint.Port;
             Client = new ShoppingListClient(port: Port);

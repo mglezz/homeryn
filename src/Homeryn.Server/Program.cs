@@ -22,7 +22,19 @@ namespace Homeryn.Server
 
             try
             {
-                string databasePath = GetDatabasePath(args);
+                if (args.Length == 1 && args[0] == "--help")
+                {
+                    Console.WriteLine("Usage: Homeryn.Server [--database <path>] [--backup <new-file>]");
+                    Console.WriteLine("--backup creates a consistent SQLite copy and exits without starting the server.");
+                    return;
+                }
+                (string databasePath, string? backupPath) = ParseOptions(args);
+                if (backupPath != null)
+                {
+                    DatabaseBackup.Create(databasePath, backupPath);
+                    Console.WriteLine($"Backup saved: {Path.GetFullPath(backupPath)}");
+                    return;
+                }
                 SqliteShoppingItemRepository repository = new SqliteShoppingItemRepository(databasePath);
                 new SqliteDatabase(databasePath).Initialize();
                 using RequestDispatcher dispatcher = new RequestDispatcher(new ShoppingListService(repository),
@@ -40,23 +52,37 @@ namespace Homeryn.Server
                 || exception is UnauthorizedAccessException || exception is ArgumentException
                 || exception is InvalidDataException)
             {
-                Console.Error.WriteLine($"Unable to start the server: {exception.Message}");
+                Console.Error.WriteLine($"Unable to complete the server operation: {exception.Message}");
                 Environment.ExitCode = 1;
             }
         }
 
-        private static string GetDatabasePath(string[] args)
+        private static (string DatabasePath, string? BackupPath) ParseOptions(string[] args)
         {
-            if (args.Length == 2 && args[0] == "--database" && !string.IsNullOrWhiteSpace(args[1]))
+            string? databasePath = null;
+            string? backupPath = null;
+            for (int index = 0; index < args.Length; index += 2)
             {
-                return args[1];
+                if (index + 1 >= args.Length || string.IsNullOrWhiteSpace(args[index + 1]))
+                {
+                    throw new ArgumentException("Usage: Homeryn.Server [--database <path>] [--backup <new-file>]");
+                }
+                if (args[index] == "--database" && databasePath == null)
+                {
+                    databasePath = args[index + 1];
+                }
+                else if (args[index] == "--backup" && backupPath == null)
+                {
+                    backupPath = args[index + 1];
+                }
+                else
+                {
+                    throw new ArgumentException("Unknown or repeated option. Use --help for usage.");
+                }
             }
-            if (args.Length != 0)
-            {
-                throw new ArgumentException("Usage: Homeryn.Server [--database <path>]");
-            }
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            databasePath ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Homeryn", "server", "homeryn.db");
+            return (databasePath, backupPath);
         }
     }
 }

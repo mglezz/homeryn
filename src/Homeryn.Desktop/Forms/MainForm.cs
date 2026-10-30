@@ -26,11 +26,8 @@ namespace Homeryn.Desktop
             }
 
             isConnecting = true;
-            Button? button = sender as Button;
-            if (button != null)
-            {
-                button.Enabled = false;
-            }
+            connectButton.Enabled = false;
+            startServerButton.Enabled = false;
 
             try
             {
@@ -68,9 +65,10 @@ namespace Homeryn.Desktop
             finally
             {
                 isConnecting = false;
-                if (button != null && !button.IsDisposed)
+                if (!IsDisposed)
                 {
-                    button.Enabled = true;
+                    connectButton.Enabled = true;
+                    startServerButton.Enabled = true;
                 }
             }
         }
@@ -117,6 +115,10 @@ namespace Homeryn.Desktop
                 LocalServerLauncher launcher = new LocalServerLauncher();
                 if (!await launcher.IsRunningAsync(lifetime.Token))
                 {
+                    if (IsDisposed || lifetime.IsCancellationRequested)
+                    {
+                        return;
+                    }
                     string? executable = launcher.FindExecutable();
                     if (executable == null)
                     {

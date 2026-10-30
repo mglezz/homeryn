@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a reproducible problem in Homeryn.
+body:
+  - type: markdown
+    attributes:
+      value: Please remove personal information. Do not attach a database or backup to a public issue.
+  - type: input
+    id: version
+    attributes:
+      label: Homeryn version
+      placeholder: 0.1.0, or a commit hash
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and display scaling
+      placeholder: Windows 11 x64, 125%
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include expected behavior, actual behavior, and any error text.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Did this happen after an update, restart, or a change in another window?

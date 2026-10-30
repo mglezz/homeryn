@@ -1,0 +1,17 @@
+name: Feature request
+description: Suggest an improvement to everyday home coordination.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the task or difficulty before suggesting a solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+      description: How would this help? Include alternatives if useful.
+    validations:
+      required: true

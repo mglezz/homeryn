@@ -21,6 +21,8 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+!docs/releases/
+!docs/releases/*.md
 x64/
 x86/
 [Ww][Ii][Nn]32/
@@ -367,3 +369,18 @@ FodyWeavers.xsd
 *.db-wal
 *.db-shm
 *.db-journal
+
+# Local credentials and alternative SQLite filenames
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite3-journal

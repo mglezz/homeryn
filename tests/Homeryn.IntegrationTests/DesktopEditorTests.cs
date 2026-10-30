@@ -22,7 +22,7 @@ namespace Homeryn.IntegrationTests
                         {
                             try
                             {
-                                await VerifyEditorAsync(form, chores, token);
+                                await VerifyEditorAsync(form, chores, server.Port, token);
                                 form.Close();
                                 result.TrySetResult();
                             }
@@ -44,7 +44,7 @@ namespace Homeryn.IntegrationTests
                 thread.SetApartmentState(ApartmentState.STA);
                 thread.Start();
                 await result.Task.WaitAsync(TimeSpan.FromSeconds(15), token);
-                Console.WriteLine($"PASS: {(chores ? "Chore" : "Shopping")} editor preserves drafts and resets selection after add, save and refresh");
+                Console.WriteLine($"PASS: {(chores ? "Chore" : "Shopping")} editor preserves drafts, resets selection and recovers from another client's edit");
             }
             return 2;
         }
@@ -58,7 +58,7 @@ namespace Homeryn.IntegrationTests
             return new ShoppingListForm(new ShoppingListClient(port: port));
         }
 
-        private static async Task VerifyEditorAsync(Form form, bool chores, CancellationToken token)
+        private static async Task VerifyEditorAsync(Form form, bool chores, int port, CancellationToken token)
         {
             TextBox name = Find<TextBox>(form, "itemNameTextBox");
             DataGridView grid = Find<DataGridView>(form, "itemsGrid");
@@ -113,6 +113,36 @@ namespace Homeryn.IntegrationTests
                 Find<CheckBox>(form, "purchasedCheckBox").Checked = false;
             }
             Assert(!save.Enabled && grid.Enabled, "Reverting an edit must restore clean selection.");
+            reset.PerformClick();
+            AssertReset(name, grid, add, save);
+
+            grid.CurrentCell = grid.Rows[0].Cells[0];
+            grid.Rows[0].Selected = true;
+            if (chores)
+            {
+                ChoresClient other = new ChoresClient(port: port);
+                Homeryn.Shared.Chores.Chore item = (await other.ReadAllAsync(token)).Single();
+                await other.UpdateAsync(item, new Homeryn.Shared.Chores.ChoreInput("Another window", item.Assignee, item.DueDate, item.IsCompleted), token);
+            }
+            else
+            {
+                ShoppingListClient other = new ShoppingListClient(port: port);
+                Homeryn.Shared.Shopping.ShoppingItem item = (await other.ReadAllAsync(token)).Single();
+                await other.UpdateAsync(item, new Homeryn.Shared.Shopping.ShoppingItemInput("Another window", item.Quantity, item.IsPurchased), token);
+            }
+            name.Text = "Unsaved local change";
+            save.PerformClick();
+            await WaitUntilAsync(() => status.Text.StartsWith("Someone changed") && refresh.Enabled, token);
+            Assert(name.Text == "Unsaved local change" && !save.Enabled && !add.Enabled,
+                "A stale edit must preserve the draft and require refresh.");
+            // Revert the draft to avoid a modal confirmation in the unattended runner.
+            name.Text = "Editor test";
+            refresh.PerformClick();
+            await WaitUntilAsync(() => status.Text.StartsWith("List refreshed.") && refresh.Enabled, token);
+            AssertReset(name, grid, add, save);
+            grid.CurrentCell = grid.Rows[0].Cells[0];
+            grid.Rows[0].Selected = true;
+            Assert(name.Text == "Another window", "Refresh did not load the other client's committed version.");
             reset.PerformClick();
             AssertReset(name, grid, add, save);
         }
