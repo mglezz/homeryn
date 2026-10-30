@@ -7,24 +7,29 @@ namespace Homeryn.Server.Networking
 {
     internal static class ClientHandler
     {
-        public static async Task HandleAsync(TcpClient client, RequestDispatcher dispatcher, CancellationToken cancellationToken)
+        public static async Task HandleAsync(TcpClient client, RequestDispatcher dispatcher,
+            TimeSpan requestTimeout, CancellationToken cancellationToken)
         {
             using (client)
             {
+                using CancellationTokenSource deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 try
                 {
                     NetworkStream stream = client.GetStream();
                     while (!cancellationToken.IsCancellationRequested)
                     {
+                        // Bound the whole exchange, including partial frames, storage waits, and writes.
+                        // Receiving another byte does not restart this deadline.
+                        deadline.CancelAfter(requestTimeout);
                         RequestMessage? request;
                         try
                         {
-                            request = await JsonMessageStream.ReadAsync<RequestMessage>(stream, cancellationToken);
+                            request = await JsonMessageStream.ReadAsync<RequestMessage>(stream, deadline.Token);
                         }
                         catch (JsonException)
                         {
                             await JsonMessageStream.WriteAsync(
-                                stream, new ResponseMessage("ERROR", "INVALID_REQUEST"), cancellationToken);
+                                stream, new ResponseMessage("ERROR", "INVALID_REQUEST"), deadline.Token);
                             continue;
                         }
 
@@ -33,14 +38,14 @@ namespace Homeryn.Server.Networking
                             return;
                         }
 
-                        ResponseMessage response = await dispatcher.DispatchAsync(request, cancellationToken);
+                        ResponseMessage response = await dispatcher.DispatchAsync(request, deadline.Token);
 
-                        await JsonMessageStream.WriteAsync(stream, response, cancellationToken);
+                        await JsonMessageStream.WriteAsync(stream, response, deadline.Token);
                     }
                 }
-                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                catch (OperationCanceledException) when (deadline.IsCancellationRequested)
                 {
-                    // The server is stopping, so no error response is needed.
+                    // Shutdown or an expired request closes only this connection.
                 }
                 catch (IOException exception)
                 {
